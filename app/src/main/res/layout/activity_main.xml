@@ -9,7 +9,7 @@
         android:id="@+id/ma_btn"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:text="@string/ma_button_text"
+        android:text="@string/ma_btn_txt_lights_up"
         android:textSize="20sp"/>
 
 </RelativeLayout>

@@ -2,7 +2,6 @@ package com.aidanas.torch;
 
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +11,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+/**
+ * Main activity class. This activity shall allow a user to turn the flash of a the camera on ir off.
+ */
 public class MainActivity extends AppCompatActivity {
 
     // Tag for debug.
@@ -27,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Holds reference to device's camera.
     private Camera cam;
+
+    // Views
+    private Button btn;
 
 
     @Override
@@ -52,7 +57,11 @@ public class MainActivity extends AppCompatActivity {
          */
         if (hasCameraFlash()) {
 
-            Button btn = (Button) findViewById(R.id.ma_btn);
+            btn = (Button) findViewById(R.id.ma_btn);
+
+            if (isLightOn)
+                btn.setText(R.string.ma_btn_txt_lights_down);
+
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -67,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
                         // Restore orientation.
                         setRequestedOrientation(oldOrientation);
 
+                        btn.setText(R.string.ma_btn_txt_lights_up);
+                        isLightOn = false;
+
                     } else {
 
                         // Save current orientation of the screen and lock to it.
@@ -74,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
                         lightOn(!isLightOn);
+
+                        btn.setText(R.string.ma_btn_txt_lights_down);
+
+                        isLightOn = true;
 
                     }
                 }
@@ -99,37 +115,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Method to toggle light on/off
-     * @param should ture to turn on or false to turn off.
-     */
-    private void lightOn(boolean should) {
-
-        if (Const.DEBUG) Log.v(TAG, "In lightOn(), should = " + should);
-
-        if (should){
-            cam = Camera.open();
-            Camera.Parameters p = cam.getParameters();
-            p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            cam.setParameters(p);
-            isLightOn = true;
-        } else {
-            if (cam != null) {
-                cam.release();
-            }
-            isLightOn = false;
-        }
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
 
         if (Const.DEBUG) Log.v(TAG, "In onPause(), isLightOn = " + isLightOn);
 
-        if (cam != null){
-            cam.release();
-        }
+        lightOn(false);
 
     }
 
@@ -196,4 +188,25 @@ public class MainActivity extends AppCompatActivity {
         return hasCameraFlash;
     }
 
+    /**
+     * Method to toggle light on/off
+     * @param should ture to turn on or false to turn off.
+     */
+    private void lightOn(boolean should) {
+
+        if (Const.DEBUG) Log.v(TAG, "In lightOn(), should = " + should);
+
+        if (should){
+            cam = Camera.open();
+            Camera.Parameters p = cam.getParameters();
+            p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            cam.setParameters(p);
+
+        } else {
+            if (cam != null) {
+                cam.release();
+            }
+
+        }
+    }
 }
