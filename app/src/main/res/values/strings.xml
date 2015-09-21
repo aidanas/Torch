@@ -5,4 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="ma_btn_txt_lights_up">Lights UP!</string>
     <string name="ma_btn_txt_lights_down">Lights DOWN!\n(Orientation locked)</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
