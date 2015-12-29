@@ -15,7 +15,7 @@ import com.aidanas.torch.fragments.MainFragment;
 public class MainActivity extends AppCompatActivity implements MainFragment.OnMainFragmentInteractionListener{
 
     // Tag for debug.
-    private final String TAG = this.getClass().getName();
+    private final String TAG = this.getClass().getSimpleName();
 
     private final String paramsToMainFrag = "none";
 
@@ -80,12 +80,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
 
         if (Const.DEBUG) Log.v(TAG, "In onOptionsItemSelected()");
 
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }

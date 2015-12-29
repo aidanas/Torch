@@ -27,11 +27,11 @@ import com.aidanas.torch.R;
 public class MainFragment extends Fragment {
 
     // Tag for debug.
-    private final String TAG = this.getClass().getName();
+    private final String TAG = this.getClass().getSimpleName();
 
     // Light ON/OFF flag
     private boolean isLightOn = false;
-    private int oldOrientation = getActivity().getRequestedOrientation();
+    private int oldOrientation;
 
     // Above flags bundle access identifier.
     private static final String IS_LIGHT_ON = "Is light on?";
@@ -83,6 +83,8 @@ public class MainFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In onAttach()");
 
+        oldOrientation = getActivity().getRequestedOrientation();
+
         try {
             mListener = (OnMainFragmentInteractionListener) context;
         } catch (ClassCastException e) {
@@ -100,12 +102,14 @@ public class MainFragment extends Fragment {
                 "\noldOrientation = " + oldOrientation +
                 "\nisLightOn = " + isLightOn);
 
+        // Get arguments of this fragment.
+        mParam1 = getArguments().getString(ARG_PARAM1);
+
         // Restore state is there is one
         if (savedInstanceState != null) {
             if (Const.DEBUG) Log.v(TAG, "savedInstanceState != null, restoring state...");
             isLightOn = savedInstanceState.getBoolean(IS_LIGHT_ON);
             oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
-            mParam1 = getArguments().getString(ARG_PARAM1);
         }
     }
 
@@ -193,6 +197,9 @@ public class MainFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState()");
+
         outState.putBoolean(IS_LIGHT_ON, isLightOn);
         outState.putInt(OLD_ORIENTATION, oldOrientation);
     }
@@ -250,6 +257,7 @@ public class MainFragment extends Fragment {
             }
 
         }
+
     }
 
     /**
