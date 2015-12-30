@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.aidanas.torch.Const;
+import com.aidanas.torch.R;
 
 
 /**
@@ -21,10 +22,6 @@ public class SettingsFragment extends PreferenceFragment {
 
     // Tag for debug.
     private final String TAG = this.getClass().getSimpleName();
-
-    // Views
-    private View root;
-    private Button btn;
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -44,11 +41,11 @@ public class SettingsFragment extends PreferenceFragment {
      * @return A new instance of fragment MainFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MainFragment newInstance(String param1) {
+    public static SettingsFragment newInstance(String param1) {
 
         if (Const.DEBUG) Log.v(SettingsFragment.class.getName(), "In newInstance()");
 
-        MainFragment fragment = new MainFragment();
+        SettingsFragment fragment = new SettingsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         fragment.setArguments(args);
@@ -80,6 +77,9 @@ public class SettingsFragment extends PreferenceFragment {
             if (Const.DEBUG) Log.v(TAG, "savedInstanceState != null, restoring state...");
 
         }
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
     }
 
     @Override

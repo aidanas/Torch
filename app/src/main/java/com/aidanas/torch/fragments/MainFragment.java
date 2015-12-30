@@ -49,8 +49,8 @@ public class MainFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
+    // Should light be on? (by preference "auto on")
+//    private boolean mParam1;
 
     private OnMainFragmentInteractionListener mListener;
 
@@ -62,13 +62,13 @@ public class MainFragment extends Fragment {
      * @return A new instance of fragment MainFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MainFragment newInstance(String param1) {
+    public static MainFragment newInstance(boolean param1) {
 
         if (Const.DEBUG) Log.v(MainFragment.class.getName(), "In newInstance()");
 
         MainFragment fragment = new MainFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putBoolean(ARG_PARAM1, param1);
         fragment.setArguments(args);
         return fragment;
     }
@@ -103,7 +103,7 @@ public class MainFragment extends Fragment {
                 "\nisLightOn = " + isLightOn);
 
         // Get arguments of this fragment.
-        mParam1 = getArguments().getString(ARG_PARAM1);
+        isLightOn = getArguments().getBoolean(ARG_PARAM1);
 
         // Restore state is there is one
         if (savedInstanceState != null) {
