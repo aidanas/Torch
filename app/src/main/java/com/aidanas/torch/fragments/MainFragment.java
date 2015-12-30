@@ -107,7 +107,9 @@ public class MainFragment extends Fragment {
 
         // Restore state is there is one
         if (savedInstanceState != null) {
+
             if (Const.DEBUG) Log.v(TAG, "savedInstanceState != null, restoring state...");
+
             isLightOn = savedInstanceState.getBoolean(IS_LIGHT_ON);
             oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
         }
@@ -119,7 +121,7 @@ public class MainFragment extends Fragment {
         // Inflate the layout for this fragment
         root = inflater.inflate(R.layout.fragment_main, container, false);
 
-         /*
+        /*
          * If the device has camera flash attach listener to the button.
          */
         if (hasCameraFlash()) {
@@ -250,6 +252,7 @@ public class MainFragment extends Fragment {
             Camera.Parameters p = cam.getParameters();
             p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             cam.setParameters(p);
+            cam.startPreview();
 
         } else {
             if (cam != null) {
