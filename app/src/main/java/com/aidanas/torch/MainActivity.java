@@ -1,6 +1,8 @@
 package com.aidanas.torch;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,8 +39,18 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean autoOnPref = sharedPref.getBoolean(SettingsActivity.KEY_PREF_AUTO_ON, false);
 
+        FragmentManager fManager = getFragmentManager();
+
+        // Find fragment or create a new one.
+        Fragment mainFragment = fManager.findFragmentByTag(MainFragment.TAG);
+
+        if (mainFragment == null){
+            mainFragment = MainFragment.newInstance(autoOnPref);
+        }
+
         // Load main fragment into the main activity frame
-        getFragmentManager().beginTransaction().add(R.id.ma_frame, MainFragment.newInstance(autoOnPref)).commit();
+        getFragmentManager().beginTransaction().replace(R.id.ma_frame, mainFragment,
+                MainFragment.TAG).commit();
 
     }
 

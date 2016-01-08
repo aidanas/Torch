@@ -26,8 +26,8 @@ import com.aidanas.torch.R;
  */
 public class MainFragment extends Fragment {
 
-    // Tag for debug.
-    private final String TAG = this.getClass().getSimpleName();
+    // Tag.
+    public static final String TAG = MainFragment.class.getName();
 
     // Light ON/OFF flag
     private boolean isLightOn = false;
@@ -241,27 +241,62 @@ public class MainFragment extends Fragment {
 
     /**
      * Method to toggle light on/off
-     * @param should ture to turn on or false to turn off.
+     * @param should true to turn on or false to turn off.
      */
     private void lightOn(boolean should) {
 
         if (Const.DEBUG) Log.v(TAG, "In lightOn(), should = " + should);
 
         if (should){
-            cam = Camera.open();
-            Camera.Parameters p = cam.getParameters();
-            p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            cam.setParameters(p);
-            cam.startPreview();
+
+            try {
+                releaseCamera();
+                cam = Camera.open();
+                Camera.Parameters p = cam.getParameters();
+                p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                cam.setParameters(p);
+                cam.startPreview();
+
+            } catch (Exception e) {
+
+                Log.e(getString(R.string.app_name), "failed to open Camera");
+                e.printStackTrace();
+            }
 
         } else {
-            if (cam != null) {
-                cam.release();
-            }
+
+            releaseCamera();
 
         }
 
     }
+
+
+    /**
+     * Release camera if it is used at the moment.
+     */
+    private void releaseCamera() {
+        if (cam != null) {
+            cam.release();
+            cam = null;
+        }
+    }
+
+
+
+
+//    /**
+//     * Returns the TAG for this fragment.
+//     * @return - this fragments TAG.
+//     */
+//    public String getTAG(){
+//        return this.TAG;
+//    }
+
+
+    /***********************************************************************************************
+     *                                  INTERFACES
+     **********************************************************************************************/
 
     /**
      * This interface must be implemented by activities that contain this
