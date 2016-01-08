@@ -17,12 +17,9 @@ import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link OnMainFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MainFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * @author Aidanas Tamasauskas
+ *
+ * Fragment to hold the LED ON/OFF logic
  */
 public class MainFragment extends Fragment {
 
@@ -113,6 +110,10 @@ public class MainFragment extends Fragment {
             isLightOn = savedInstanceState.getBoolean(IS_LIGHT_ON);
             oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
         }
+
+        // Attach to the camera in advance.
+        if (this.cam == null)
+            this.cam = getCamera();
     }
 
     @Override
@@ -220,9 +221,9 @@ public class MainFragment extends Fragment {
         mListener = null;
     }
 
-     /****************************************************
-      * Only Android live cycle methods above this point!
-      ****************************************************/
+    /****************************************************
+     * Only Android live cycle methods above this point!
+     ****************************************************/
 
     /**
      * MEthod to check the availability of camera flash.
@@ -250,12 +251,10 @@ public class MainFragment extends Fragment {
         if (should){
 
             try {
-                releaseCamera();
-                cam = Camera.open();
-                Camera.Parameters p = cam.getParameters();
+                Camera.Parameters p = this.cam.getParameters();
                 p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                cam.setParameters(p);
-                cam.startPreview();
+                this.cam.setParameters(p);
+                this.cam.startPreview();
 
             } catch (Exception e) {
 
@@ -264,11 +263,33 @@ public class MainFragment extends Fragment {
             }
 
         } else {
-
-            releaseCamera();
+            Camera.Parameters p = this.cam.getParameters();
+            p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            this.cam.setParameters(p);
+//            this.cam.stopPreview();
+//            releaseCamera();
 
         }
 
+    }
+
+
+    /**
+     * Method to get and configure camera. Should improve improve user experience due to quicker
+     * response time to "Lights ON" request.
+     *
+     * @return main camera of a device.
+     */
+    public Camera getCamera(){
+        if (Const.DEBUG) Log.v(TAG, "In getCamera()");
+
+        // Open, configure and return a camera object.
+        Camera cam = Camera.open();
+        Camera.Parameters p = cam.getParameters();
+        p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        cam.setParameters(p);
+
+        return cam;
     }
 
 
