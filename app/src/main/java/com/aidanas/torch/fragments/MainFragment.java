@@ -1,12 +1,15 @@
 package com.aidanas.torch.fragments;
 
+import android.app.Dialog;
+import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,13 +47,12 @@ public class MainFragment extends Fragment {
     private View root;
     private Button btn;
 
+    // Dialogs
+    private Dialog dlgNoFlash;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
-
-    // Should light be on? (by preference "auto on")
-//    private boolean mParam1;
 
     private OnMainFragmentInteractionListener mListener;
 
@@ -163,6 +165,8 @@ public class MainFragment extends Fragment {
                     }
                 }
             });
+        } else {
+            noFlashAndBye();
         }
 
         return root;
@@ -213,6 +217,14 @@ public class MainFragment extends Fragment {
         if (Const.DEBUG) Log.v(TAG, "In onPause(), isLightOn = " + isLightOn);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (dlgNoFlash != null) {
+            dlgNoFlash.cancel();
+            dlgNoFlash = null;
+        }
+    }
 
     @Override
     public void onDetach() {
@@ -248,7 +260,6 @@ public class MainFragment extends Fragment {
         if (Const.DEBUG) Log.v(TAG, "In lightOn(), should = " + should);
 
         if (should){
-
             try {
                 releaseCamera();
                 cam = Camera.open();
@@ -271,7 +282,6 @@ public class MainFragment extends Fragment {
 
     }
 
-
     /**
      * Release camera if it is used at the moment.
      */
@@ -282,17 +292,25 @@ public class MainFragment extends Fragment {
         }
     }
 
+    /**
+     * Method to inform the user that their device has no required hardware (camera flash) and exit.
+     */
+    private void noFlashAndBye() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
+        builder.setTitle(R.string.no_flash_found);
 
-
-
-//    /**
-//     * Returns the TAG for this fragment.
-//     * @return - this fragments TAG.
-//     */
-//    public String getTAG(){
-//        return this.TAG;
-//    }
-
+        // Single button ('OK') dialog.
+        builder.setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+                getActivity().finish();
+            }
+        });
+        builder.setCancelable(false);
+        builder.setView(getActivity().getLayoutInflater().inflate(R.layout.dialog_no_flash_found, null));
+        this.dlgNoFlash = builder.create();
+        this.dlgNoFlash.show();
+    }
 
     /***********************************************************************************************
      *                                  INTERFACES
