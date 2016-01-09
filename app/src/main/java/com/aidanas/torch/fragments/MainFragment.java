@@ -27,7 +27,7 @@ import com.aidanas.torch.R;
 public class MainFragment extends Fragment {
 
     // Tag.
-    public static final String TAG = MainFragment.class.getName();
+    public static final String TAG = MainFragment.class.getSimpleName();
 
     // Light ON/OFF flag
     private boolean isLightOn = false;
@@ -118,6 +118,9 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        if (Const.DEBUG) Log.v(TAG, "In onCreateView(), isLightOn = " + isLightOn);
+
         // Inflate the layout for this fragment
         root = inflater.inflate(R.layout.fragment_main, container, false);
 
@@ -211,7 +214,7 @@ public class MainFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
-        if (Const.DEBUG) Log.v(TAG, "In onPause(), isLightOn = " + isLightOn);
+        if (Const.DEBUG) Log.v(TAG, "In onStop(), isLightOn = " + isLightOn);
         lightOn(false);
         releaseCamera();
     }
@@ -219,6 +222,9 @@ public class MainFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if (Const.DEBUG) Log.v(TAG, "In onDestroy(), isLightOn = " + isLightOn);
+
         if (dlgNoFlash != null) {
             dlgNoFlash.cancel();
             dlgNoFlash = null;
@@ -229,6 +235,8 @@ public class MainFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        if (Const.DEBUG) Log.v(TAG, "In onDetach(), isLightOn = " + isLightOn);
+
         mListener = null;
     }
 
@@ -298,6 +306,8 @@ public class MainFragment extends Fragment {
      * Release camera if it is used at the moment.
      */
     private void releaseCamera() {
+        if (Const.DEBUG) Log.v(TAG, "In releaseCamera(), this.cam = " + this.cam);
+
         if (this.cam != null) {
             this.cam.stopPreview();
             this.cam.release();

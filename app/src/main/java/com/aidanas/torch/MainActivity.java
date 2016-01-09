@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
     protected void onStop() {
         super.onStop();
 
-        if (Const.DEBUG) Log.v(TAG, "In onPause()");
+        if (Const.DEBUG) Log.v(TAG, "In onStop()");
     }
 
     @Override
@@ -104,17 +104,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
         int id = item.getItemId();
 
         switch (id) {
-
             case R.id.action_about:
                   showAboutDialog();
-
-//            // Settings menu item selected.
-//            case R.id.action_settings:
-//                Intent i = new Intent(this, SettingsActivity.class);
-//                startActivity(i);
-//                break;
         }
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -124,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
         super.onSaveInstanceState(outState);
 
         if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState()");
-
     }
 
     @Override
