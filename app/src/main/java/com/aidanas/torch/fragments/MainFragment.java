@@ -41,15 +41,11 @@ public class MainFragment extends Fragment {
     private View root;
     private Button btn;
 
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    // The fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
 
-    // Should light be on? (by preference "auto on")
-//    private boolean mParam1;
-
     private OnMainFragmentInteractionListener mListener;
+
 
     /**
      * Use this factory method to create a new instance of
@@ -111,9 +107,7 @@ public class MainFragment extends Fragment {
             oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
         }
 
-        // Attach to the camera in advance.
-        if (this.cam == null)
-            this.cam = getCamera();
+
     }
 
     @Override
@@ -175,6 +169,9 @@ public class MainFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In onStart(), isLightOn = " + isLightOn);
 
+        // Attach to the camera in advance.
+        if (this.cam == null)
+            this.cam = getCamera();
     }
 
     @Override
@@ -184,7 +181,6 @@ public class MainFragment extends Fragment {
         if (Const.DEBUG) Log.v(TAG, "In onResume(), isLightOn = " + isLightOn);
 
         lightOn(isLightOn);
-
     }
 
     @Override
@@ -192,9 +188,6 @@ public class MainFragment extends Fragment {
         super.onPause();
 
         if (Const.DEBUG) Log.v(TAG, "In onPause(), isLightOn = " + isLightOn);
-
-        lightOn(false);
-
     }
 
     @Override
@@ -212,8 +205,15 @@ public class MainFragment extends Fragment {
         super.onStop();
 
         if (Const.DEBUG) Log.v(TAG, "In onPause(), isLightOn = " + isLightOn);
+        lightOn(false);
+        releaseCamera();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+    }
 
     @Override
     public void onDetach() {
@@ -248,29 +248,23 @@ public class MainFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In lightOn(), should = " + should);
 
+        /*
+         * Toggle camera's flash.
+         */
         if (should){
-
             try {
-                Camera.Parameters p = this.cam.getParameters();
+                Camera.Parameters p = cam.getParameters();
                 p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                this.cam.setParameters(p);
-                this.cam.startPreview();
-
+                cam.setParameters(p);
             } catch (Exception e) {
-
                 Log.e(getString(R.string.app_name), "failed to open Camera");
                 e.printStackTrace();
             }
-
         } else {
             Camera.Parameters p = this.cam.getParameters();
             p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             this.cam.setParameters(p);
-//            this.cam.stopPreview();
-//            releaseCamera();
-
         }
-
     }
 
 
@@ -283,12 +277,9 @@ public class MainFragment extends Fragment {
     public Camera getCamera(){
         if (Const.DEBUG) Log.v(TAG, "In getCamera()");
 
-        // Open, configure and return a camera object.
+        // Open, start and return a camera object.
         Camera cam = Camera.open();
-        Camera.Parameters p = cam.getParameters();
-        p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-        cam.setParameters(p);
-
+        cam.startPreview();
         return cam;
     }
 
@@ -297,22 +288,12 @@ public class MainFragment extends Fragment {
      * Release camera if it is used at the moment.
      */
     private void releaseCamera() {
-        if (cam != null) {
-            cam.release();
-            cam = null;
+        if (this.cam != null) {
+            this.cam.stopPreview();
+            this.cam.release();
+            this.cam = null;
         }
     }
-
-
-
-
-//    /**
-//     * Returns the TAG for this fragment.
-//     * @return - this fragments TAG.
-//     */
-//    public String getTAG(){
-//        return this.TAG;
-//    }
 
 
     /***********************************************************************************************
