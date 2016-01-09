@@ -17,7 +17,7 @@
     <string name="about_dialog_support">
         However, if you wish to support me with a cup of coffee you are more than welcome to do so,
         my PayPal - Aidanas@inbox.com, thank you. ;) </string>
-    <string name="about_dialog_title">Just a basic torch, v1.0</string>
+    <string name="about_dialog_title">Just a basic torch, v1.2</string>
     <string name="OK">OK</string>
     <string name="no_flash_found">No Camera Flash Found!</string>
     <string name="dlg_no_flash_found_tw">Application could not find camera flash!\nMake sure the device has got camera and an LED flash!</string>
