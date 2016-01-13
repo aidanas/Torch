@@ -1,8 +1,8 @@
 package com.aidanas.torch.fragments;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -78,7 +78,7 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(Activity context) {
         super.onAttach(context);
 
         if (Const.DEBUG) Log.v(TAG, "In onAttach()");
@@ -181,7 +181,7 @@ public class MainFragment extends Fragment {
 
         // Attach to the camera in advance.
         if (this.cam == null)
-            this.cam = getCamera();
+            this.cam = mListener.getCameraFromActivity();
     }
 
     @Override
@@ -216,7 +216,6 @@ public class MainFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In onStop(), isLightOn = " + isLightOn);
         lightOn(false);
-        releaseCamera();
     }
 
     @Override
@@ -286,36 +285,6 @@ public class MainFragment extends Fragment {
         }
     }
 
-
-    /**
-     * Method to get and configure camera. Should improve improve user experience due to quicker
-     * response time to "Lights ON" request.
-     *
-     * @return main camera of a device.
-     */
-    public Camera getCamera(){
-        if (Const.DEBUG) Log.v(TAG, "In getCamera()");
-
-        // Open, start and return a camera object.
-        Camera cam = Camera.open();
-        cam.startPreview();
-        return cam;
-    }
-
-    /**
-     * Release camera if it is used at the moment.
-     */
-    private void releaseCamera() {
-        if (Const.DEBUG) Log.v(TAG, "In releaseCamera(), this.cam = " + this.cam);
-
-        if (this.cam != null) {
-            this.cam.stopPreview();
-            this.cam.release();
-            this.cam = null;
-        }
-    }
-
-
     /**
      * Method to inform the user that their device has no required hardware (camera flash) and exit.
      */
@@ -351,8 +320,10 @@ public class MainFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnMainFragmentInteractionListener {
-        // TODO: Update argument type and name
+
         void onMainFragmentInteraction(Uri uri);
+
+        Camera getCameraFromActivity();
     }
 
 }

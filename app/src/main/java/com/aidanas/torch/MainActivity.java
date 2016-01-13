@@ -1,18 +1,22 @@
 package com.aidanas.torch;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.hardware.Camera;
 import android.net.Uri;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.aidanas.torch.fragments.MainFragment;
 
@@ -25,8 +29,13 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
     private final String TAG = this.getClass().getSimpleName();
 
     // This might be used in 'auto on' feature in the setting menu is to be implemented.
-    private final boolean paramsToMainFragAutoOn = false;
+//    private final boolean paramsToMainFragAutoOn = false;
 
+    private String[] mDrawerTitles;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+
+    private Camera mCam;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +43,21 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
 
         if (Const.DEBUG) Log.v(TAG, "In onCreate()");
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_drawnav);
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean autoOnPref = sharedPref.getBoolean(SettingsActivity.KEY_PREF_AUTO_ON, false);
+        mDrawerTitles = getResources().getStringArray(R.array.nav_drawer_titles);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList   = (ListView) findViewById(R.id.left_drawer);
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.navdraw_list_item_layout, mDrawerTitles));
+
+        // Set the list's click listener
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+//        boolean autoOnPref = sharedPref.getBoolean(SettingsActivity.KEY_PREF_AUTO_ON, false);
 
         FragmentManager fManager = getFragmentManager();
 
@@ -45,11 +65,11 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
         Fragment mainFragment = fManager.findFragmentByTag(MainFragment.TAG);
 
         if (mainFragment == null){
-            mainFragment = MainFragment.newInstance(autoOnPref);
+            mainFragment = MainFragment.newInstance(false);
         }
 
         // Load main fragment into the main activity frame
-        getFragmentManager().beginTransaction().replace(R.id.ma_frame, mainFragment,
+        getFragmentManager().beginTransaction().replace(R.id.ma_navdraw_content_frame, mainFragment,
                 MainFragment.TAG).commit();
 
     }
@@ -60,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
 
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
+        this.mCam = getCamera();
     }
 
     @Override
@@ -83,6 +104,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
         super.onStop();
 
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
+
+        releaseCamera();
+
     }
 
     @Override
@@ -152,12 +176,84 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
 
     }
 
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+
+        // For logging purposes.
+        private final String TAG = this.getClass().getSimpleName();
+
+        @Override
+        public void onItemClick(AdapterView parent, View view, int position, long id) {
+
+            if (Const.DEBUG) Log.v(TAG, "In onItemClick(), position = " + position);
+
+            selectItem(position);
+        }
+    }
+
+    /** Swaps fragments in the main content view */
+    private void selectItem(int position) {
+        // Create a new fragment and specify the planet to show based on position
+        Fragment frag = MainFragment.newInstance(false);
+
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.ma_navdraw_content_frame, frag)
+                .commit();
+
+        // Highlight the selected item, update the title, and close the drawer
+        mDrawerList.setItemChecked(position, true);
+        setTitle(mDrawerTitles[position]);
+        mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        ActionBar ab = getActionBar();
+        if (ab != null){
+            getActionBar().setTitle(title);
+        }
+    }
+
     /**
-     * Interface implementation method to deam with MainFragment communication.
+     * Interface implementation method to do with MainFragment communication.
      * @param uri
      */
     @Override
     public void onMainFragmentInteraction(Uri uri) {
         return;
+    }
+
+    @Override
+    public android.hardware.Camera getCameraFromActivity(){
+        return this.mCam;
+    }
+
+    /**
+     * Method to get and configure camera. Should improve improve user experience due to quicker
+     * response time to "Lights ON" request.
+     *
+     * @return main camera of a device.
+     */
+    private Camera getCamera(){
+        if (Const.DEBUG) Log.v(TAG, "In getCamera()");
+
+        // Open, start and return a camera object.
+        Camera cam = Camera.open();
+        cam.startPreview();
+        return cam;
+    }
+
+    /**
+     * Release camera if it is used at the moment.
+     */
+    private void releaseCamera() {
+        if (Const.DEBUG) Log.v(TAG, "In releaseCamera(), this.cam = " + this.mCam);
+
+        if (this.mCam != null) {
+            this.mCam.stopPreview();
+            this.mCam.release();
+            this.mCam = null;
+        }
     }
 }
