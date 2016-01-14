@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity
         implements MainFragment.OnMainFragmentInteractionListener,
         StrobeFragment.OnStrobeFragmentInteractionListener{
 
+    private static final String NAV_DRAW_SELECTED_POS = "selected item";
+
     // Tag for debug.
     private final String TAG = this.getClass().getSimpleName();
 
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity
     private List<String> mDrawerTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+    private int mSelectedItem = AdapterView.INVALID_POSITION; // By default no items selected.
 
     private Camera mCam;
 
@@ -48,7 +51,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Const.DEBUG) Log.v(TAG, "In onCreate()");
+        if (Const.DEBUG) Log.v(TAG, "In onCreate(), savedInstanceState = " + savedInstanceState);
 
         setContentView(R.layout.activity_main_drawnav);
 
@@ -64,22 +67,20 @@ public class MainActivity extends AppCompatActivity
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-//        boolean autoOnPref = sharedPref.getBoolean(SettingsActivity.KEY_PREF_AUTO_ON, false);
-
         FragmentManager fManager = getFragmentManager();
 
         // Find fragment or create a new one.
-        Fragment mainFragment = fManager.findFragmentByTag(MainFragment.TAG);
+        Fragment frag = fManager.findFragmentByTag(MainFragment.TAG);
 
-        if (mainFragment == null){
-            mainFragment = MainFragment.newInstance(false);
+        if (savedInstanceState != null){
+            selectItem(savedInstanceState.getInt(NAV_DRAW_SELECTED_POS));
         }
-
-        // Load main fragment into the main activity frame
-        getFragmentManager().beginTransaction().replace(R.id.ma_navdraw_content_frame, mainFragment,
-                MainFragment.TAG).commit();
-
+        else {
+            frag = MainFragment.newInstance(false);
+            // Load main fragment into the main activity frame
+            getFragmentManager().beginTransaction().replace(R.id.ma_navdraw_content_frame, frag,
+                    MainFragment.TAG).commit();
+        }
     }
 
     @Override
@@ -146,7 +147,11 @@ public class MainActivity extends AppCompatActivity
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState()");
+        if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState(), mSelectedItem = " + mSelectedItem);
+
+        if (mSelectedItem != AdapterView.INVALID_POSITION) {
+            outState.putInt(NAV_DRAW_SELECTED_POS, mDrawerList.getSelectedItemPosition());
+        }
     }
 
     @Override
@@ -200,6 +205,8 @@ public class MainActivity extends AppCompatActivity
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
 
+        if (Const.DEBUG) Log.v(TAG, "In selectItem, position = " + position);
+
         Fragment frag;
 
         // Create a fragment depending on users' selection.
@@ -215,6 +222,8 @@ public class MainActivity extends AppCompatActivity
                 frag = MainFragment.newInstance(false);
                 break;
         }
+
+        mSelectedItem = position;
 
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();

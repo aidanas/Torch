@@ -12,12 +12,13 @@
 
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"
-        android:layout_width="240dp"
+        android:layout_width="200dp"
         android:layout_height="match_parent"
+        android:padding="5dp"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
-        android:divider="@android:drawable/divider_horizontal_dim_dark"
-        android:dividerHeight="10dp"
-        android:padding="5dp"
-        android:background="#222222"/>
+        android:divider="@color/ls_divider"
+        android:dividerHeight="5dp"
+        android:background="@color/ls_bg"/>
+
 </android.support.v4.widget.DrawerLayout>
