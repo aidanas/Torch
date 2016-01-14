@@ -1,3 +1,4 @@
+
 <resources>
     <string name="app_name">Torch</string>
 
@@ -16,7 +17,7 @@
 
     <string name="about_dialog_support">
         However, if you wish to support me with a cup of coffee you are more than welcome to do so,
-        my PayPal - Aidanas@inbox.com, thank you. =] </string>
+        my PayPal - Aidanas@inbox.com, thank you.</string>
     <string name="about_dialog_title">Torch and More, v2</string>
     <string name="OK">OK</string>
     <string name="no_flash_found">No Camera Flash Found!</string>

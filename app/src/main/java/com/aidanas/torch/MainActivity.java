@@ -18,12 +18,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.aidanas.torch.adapters.NavDrawLsAdapter;
 import com.aidanas.torch.fragments.MainFragment;
+import com.aidanas.torch.fragments.StrobeFragment;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Main activity class. This activity shall allow a user to turn the flash of a the camera on ir off.
  */
-public class MainActivity extends AppCompatActivity implements MainFragment.OnMainFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity
+        implements MainFragment.OnMainFragmentInteractionListener,
+        StrobeFragment.OnStrobeFragmentInteractionListener{
 
     // Tag for debug.
     private final String TAG = this.getClass().getSimpleName();
@@ -31,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
     // This might be used in 'auto on' feature in the setting menu is to be implemented.
 //    private final boolean paramsToMainFragAutoOn = false;
 
-    private String[] mDrawerTitles;
+    private List<String> mDrawerTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
 
@@ -45,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
 
         setContentView(R.layout.activity_main_drawnav);
 
-        mDrawerTitles = getResources().getStringArray(R.array.nav_drawer_titles);
+        mDrawerTitles = Arrays.asList(getResources().getStringArray(R.array.nav_drawer_titles));
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList   = (ListView) findViewById(R.id.left_drawer);
 
@@ -53,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.navdraw_list_item_layout, mDrawerTitles));
 
+        mDrawerList.setAdapter(new NavDrawLsAdapter(this, mDrawerTitles));
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -106,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
 
         releaseCamera();
-
     }
 
     @Override
@@ -192,8 +199,22 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
 
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
-        // Create a new fragment and specify the planet to show based on position
-        Fragment frag = MainFragment.newInstance(false);
+
+        Fragment frag;
+
+        // Create a fragment depending on users' selection.
+        switch (position){
+            case 0:
+                frag = MainFragment.newInstance(false);
+                break;
+            case 1:
+                frag = StrobeFragment.newInstance(false);
+                break;
+            default:
+                Log.e(TAG, "Default case of switch statement. Should have never happened.");
+                frag = MainFragment.newInstance(false);
+                break;
+        }
 
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
@@ -203,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
 
         // Highlight the selected item, update the title, and close the drawer
         mDrawerList.setItemChecked(position, true);
-        setTitle(mDrawerTitles[position]);
+        setTitle(mDrawerTitles.get(position));
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
@@ -221,6 +242,11 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMa
      */
     @Override
     public void onMainFragmentInteraction(Uri uri) {
+        return;
+    }
+
+    @Override
+    public void onStrobeFragmentInteraction(Uri uri) {
         return;
     }
 

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.net.Uri;
@@ -14,7 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.SeekBar;
 
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
@@ -24,14 +23,11 @@ import com.aidanas.torch.R;
  *
  * Fragment to hold the LED ON/OFF logic
  */
-public class MainFragment extends Fragment {
+public class StrobeFragment extends Fragment {
 
     // Tag.
-    public static final String TAG = MainFragment.class.getSimpleName();
+    public static final String TAG = StrobeFragment.class.getSimpleName();
 
-    // Light ON/OFF flag
-    private boolean isLightOn = false;
-    private int oldOrientation;
 
     // Above flags bundle access identifier.
     private static final String IS_LIGHT_ON = "Is light on?";
@@ -40,9 +36,13 @@ public class MainFragment extends Fragment {
     // Holds reference to device's camera.
     private Camera cam;
 
+    private long strobeRate = 1040L; // Initial value
+    private long flashLegth = 1030L;   // Initial value
+
     // Views
     private View root;
-    private Button btn;
+    private SeekBar strobeSb;
+    private SeekBar flashSb;
 
     // The fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     // Dialogs
@@ -51,7 +51,9 @@ public class MainFragment extends Fragment {
     // The fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
 
-    private OnMainFragmentInteractionListener mListener;
+    private OnStrobeFragmentInteractionListener mListener;
+
+    private Thread strobeThread;
 
 
     /**
@@ -62,18 +64,18 @@ public class MainFragment extends Fragment {
      * @return A new instance of fragment MainFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MainFragment newInstance(boolean param1) {
+    public static StrobeFragment newInstance(boolean param1) {
 
-        if (Const.DEBUG) Log.v(MainFragment.class.getName(), "In newInstance()");
+        if (Const.DEBUG) Log.v(StrobeFragment.class.getName(), "In newInstance()");
 
-        MainFragment fragment = new MainFragment();
+        StrobeFragment fragment = new StrobeFragment();
         Bundle args = new Bundle();
         args.putBoolean(ARG_PARAM1, param1);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public MainFragment() {
+    public StrobeFragment() {
         // Required empty public constructor
     }
 
@@ -83,10 +85,8 @@ public class MainFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In onAttach()");
 
-        oldOrientation = getActivity().getRequestedOrientation();
-
         try {
-            mListener = (OnMainFragmentInteractionListener) context;
+            mListener = (OnStrobeFragmentInteractionListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement OnMainFragmentInteractionListener");
@@ -97,21 +97,13 @@ public class MainFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Const.DEBUG) Log.v(TAG, "In onCreate(), BEFORE state restoration" +
-                "\nBundle = " + savedInstanceState +
-                "\noldOrientation = " + oldOrientation +
-                "\nisLightOn = " + isLightOn);
-
-        // Get arguments of this fragment.
-        isLightOn = getArguments().getBoolean(ARG_PARAM1);
+        if (Const.DEBUG) Log.v(TAG, "In onCreate()");
 
         // Restore state is there is one
         if (savedInstanceState != null) {
 
             if (Const.DEBUG) Log.v(TAG, "savedInstanceState != null, restoring state...");
 
-            isLightOn = savedInstanceState.getBoolean(IS_LIGHT_ON);
-            oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
         }
     }
 
@@ -119,65 +111,51 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        if (Const.DEBUG) Log.v(TAG, "In onCreateView(), isLightOn = " + isLightOn);
+        if (Const.DEBUG) Log.v(TAG, "In onCreateView()");
 
         // Inflate the layout for this fragment
-        root = inflater.inflate(R.layout.fragment_main, container, false);
+        root = inflater.inflate(R.layout.fragment_strobe, container, false);
+        SeekBar.OnSeekBarChangeListener seekBarOListener;
+        strobeSb = (SeekBar) root.findViewById(R.id.strobe_frag_strobe_seekbar);
+        flashSb = (SeekBar) root.findViewById(R.id.strobe_frag_flash_duration_seekbar);
 
-        /*
-         * If the device has camera flash attach listener to the button.
-         */
-        if (hasCameraFlash()) {
+        strobeSb.setOnSeekBarChangeListener(seekBarOListener = new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
-            btn = (Button) root.findViewById(R.id.ma_btn);
-
-            if (isLightOn)
-                btn.setText(R.string.ma_btn_txt_lights_down);
-
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    if (Const.DEBUG) Log.v(TAG, "In onClick(), isLightOn = " + isLightOn);
-
-                    // Toggle the flash.
-                    if (isLightOn) {
-
-                        lightOn(!isLightOn);
-
-                        // Restore orientation.
-                        getActivity().setRequestedOrientation(oldOrientation);
-
-                        btn.setText(R.string.ma_btn_txt_lights_up);
-                        isLightOn = false;
-
-                    } else {
-
-                        // Save current orientation of the screen and lock to it.
-                        oldOrientation = getActivity().getRequestedOrientation();
-                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-
-                        lightOn(!isLightOn);
-
-                        btn.setText(R.string.ma_btn_txt_lights_down);
-
-                        isLightOn = true;
-
-                    }
+                if (seekBar == strobeSb) {
+                    StrobeFragment.this.strobeRate = (100 - progress) * 10 + 40;
+                } else if (seekBar == flashSb){
+                    StrobeFragment.this.flashLegth = (100 - progress) * 10 + 30;
                 }
-            });
-        } else {
-            noFlashAndBye();
-        }
+
+                if (Const.DEBUG) Log.v(TAG, "In onProgressChanged(), Thread = " +
+                        Thread.currentThread().getName() + ", strobeRate = " + strobeRate);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        flashSb.setOnSeekBarChangeListener(seekBarOListener);
 
         return root;
     }
+
 
     @Override
     public void onStart() {
         super.onStart();
 
-        if (Const.DEBUG) Log.v(TAG, "In onStart(), isLightOn = " + isLightOn);
+        if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
         // Attach to the camera in advance.
         if (this.cam == null)
@@ -188,16 +166,38 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if (Const.DEBUG) Log.v(TAG, "In onResume(), isLightOn = " + isLightOn);
+        if (Const.DEBUG) Log.v(TAG, "In onResume(), Thread = " + Thread.currentThread().getName());
 
-        lightOn(isLightOn);
+        strobeThread = new Thread(new Runnable() {
+            public void run() {
+                if (Const.DEBUG) Log.v(TAG, "In run(), Thread = " + Thread.currentThread().getName());
+
+                try {
+                    while (true) {
+                        lightOn(true);
+                        Thread.sleep(flashLegth);
+                        lightOn(false);
+                        Thread.sleep(strobeRate);
+
+                    }
+                } catch (InterruptedException e) {
+                    // Tsss.. its all going to be over soon.
+                }
+            }
+        });
+
+        strobeThread.start();
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        if (Const.DEBUG) Log.v(TAG, "In onPause(), isLightOn = " + isLightOn);
+        if (Const.DEBUG) Log.v(TAG, "In onPause()");
+
+        // Kill the strobes thread.
+        if (strobeThread != null) strobeThread.interrupt();
     }
 
     @Override
@@ -206,16 +206,14 @@ public class MainFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState()");
 
-        outState.putBoolean(IS_LIGHT_ON, isLightOn);
-        outState.putInt(OLD_ORIENTATION, oldOrientation);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        if (Const.DEBUG) Log.v(TAG, "In onStop(), isLightOn = " + isLightOn);
-        lightOn(false);
+        if (Const.DEBUG) Log.v(TAG, "In onStop()");
+
         this.cam = null;
     }
 
@@ -223,7 +221,7 @@ public class MainFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        if (Const.DEBUG) Log.v(TAG, "In onDestroy(), isLightOn = " + isLightOn);
+        if (Const.DEBUG) Log.v(TAG, "In onDestroy()");
 
         if (dlgNoFlash != null) {
             dlgNoFlash.cancel();
@@ -235,7 +233,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (Const.DEBUG) Log.v(TAG, "In onDetach(), isLightOn = " + isLightOn);
+        if (Const.DEBUG) Log.v(TAG, "In onDetach()");
 
         mListener = null;
     }
@@ -320,9 +318,9 @@ public class MainFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnMainFragmentInteractionListener {
+    public interface OnStrobeFragmentInteractionListener {
 
-        void onMainFragmentInteraction(Uri uri);
+        void onStrobeFragmentInteraction(Uri uri);
 
         Camera getCameraFromActivity();
     }
