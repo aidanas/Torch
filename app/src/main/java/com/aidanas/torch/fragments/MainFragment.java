@@ -18,13 +18,14 @@ import android.widget.Button;
 
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
+import com.aidanas.torch.interfaces.CommonFrag;
 
 /**
  * @author Aidanas Tamasauskas
  *
  * Fragment to hold the LED ON/OFF logic
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends CommonFrag {
 
     // Tag.
     public static final String TAG = MainFragment.class.getSimpleName();
@@ -97,6 +98,9 @@ public class MainFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+//        TODO: for debug purposes, remove when in prod.
+//        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
         if (Const.DEBUG) Log.v(TAG, "In onCreate(), BEFORE state restoration" +
                 "\nBundle = " + savedInstanceState +
                 "\noldOrientation = " + oldOrientation +
@@ -146,7 +150,7 @@ public class MainFragment extends Fragment {
                         lightOn(!isLightOn);
 
                         // Restore orientation.
-                        getActivity().setRequestedOrientation(oldOrientation);
+                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
                         btn.setText(R.string.ma_btn_txt_lights_up);
                         isLightOn = false;
@@ -155,7 +159,7 @@ public class MainFragment extends Fragment {
 
                         // Save current orientation of the screen and lock to it.
                         oldOrientation = getActivity().getRequestedOrientation();
-                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
                         lightOn(!isLightOn);
 
@@ -217,6 +221,9 @@ public class MainFragment extends Fragment {
         if (Const.DEBUG) Log.v(TAG, "In onStop(), isLightOn = " + isLightOn);
         lightOn(false);
         this.cam = null;
+
+        // Unlock orientation.
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
     @Override
@@ -305,6 +312,8 @@ public class MainFragment extends Fragment {
         this.dlgNoFlash = builder.create();
         this.dlgNoFlash.show();
     }
+
+    public String getTAG() { return TAG; }
 
     /***********************************************************************************************
      *                                  INTERFACES

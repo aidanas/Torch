@@ -21,6 +21,7 @@ import android.widget.ListView;
 import com.aidanas.torch.adapters.NavDrawLsAdapter;
 import com.aidanas.torch.fragments.MainFragment;
 import com.aidanas.torch.fragments.StrobeFragment;
+import com.aidanas.torch.interfaces.CommonFrag;
 
 import java.util.Arrays;
 import java.util.List;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity
                 R.layout.navdraw_list_item_layout, mDrawerTitles));
 
         mDrawerList.setAdapter(new NavDrawLsAdapter(this, mDrawerTitles));
+
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 
         // Find fragment or create a new one.
         Fragment frag = fManager.findFragmentByTag(MainFragment.TAG);
+
 
         if (savedInstanceState != null){
             selectItem(savedInstanceState.getInt(NAV_DRAW_SELECTED_POS));
@@ -149,8 +152,9 @@ public class MainActivity extends AppCompatActivity
 
         if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState(), mSelectedItem = " + mSelectedItem);
 
+        // Save current selected item in the nav drawer.
         if (mSelectedItem != AdapterView.INVALID_POSITION) {
-            outState.putInt(NAV_DRAW_SELECTED_POS, mDrawerList.getSelectedItemPosition());
+            outState.putInt(NAV_DRAW_SELECTED_POS, mSelectedItem);
         }
     }
 
@@ -207,18 +211,21 @@ public class MainActivity extends AppCompatActivity
 
         if (Const.DEBUG) Log.v(TAG, "In selectItem, position = " + position);
 
-        Fragment frag;
+        CommonFrag frag;
+        FragmentManager fragmentManager = getFragmentManager();
 
         // Create a fragment depending on users' selection.
         switch (position){
             case 0:
-                frag = MainFragment.newInstance(false);
+                frag = (CommonFrag) fragmentManager.findFragmentByTag(MainFragment.TAG);
+                if (frag == null ) frag = MainFragment.newInstance(false);
                 break;
             case 1:
-                frag = StrobeFragment.newInstance(false);
+                frag = (CommonFrag) fragmentManager.findFragmentByTag(StrobeFragment.TAG);
+                if (frag == null ) frag = StrobeFragment.newInstance(false);
                 break;
             default:
-                Log.e(TAG, "Default case of switch statement. Should have never happened.");
+                Log.e(TAG, "Default case of switch statement. THis should have never happened. O_o");
                 frag = MainFragment.newInstance(false);
                 break;
         }
@@ -226,9 +233,8 @@ public class MainActivity extends AppCompatActivity
         mSelectedItem = position;
 
         // Insert the fragment by replacing any existing fragment
-        FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.ma_navdraw_content_frame, frag)
+                .replace(R.id.ma_navdraw_content_frame, frag, frag.getTAG())
                 .commit();
 
         // Highlight the selected item, update the title, and close the drawer

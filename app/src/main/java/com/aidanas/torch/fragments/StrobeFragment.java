@@ -17,13 +17,14 @@ import android.widget.SeekBar;
 
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
+import com.aidanas.torch.interfaces.CommonFrag;
 
 /**
  * @author Aidanas Tamasauskas
  *
  * Fragment to hold the LED ON/OFF logic
  */
-public class StrobeFragment extends Fragment {
+public class StrobeFragment extends CommonFrag {
 
     // Tag.
     public static final String TAG = StrobeFragment.class.getSimpleName();
@@ -32,6 +33,9 @@ public class StrobeFragment extends Fragment {
     // Above flags bundle access identifier.
     private static final String IS_LIGHT_ON = "Is light on?";
     private static final String OLD_ORIENTATION = "Old screen orientation";
+
+    private static final String SAVED_ST_KEY_STROBE_RATE  = "strobe rate";
+    private static final String SAVED_ST_KEY_FLASH_LENGTH = "flash length";
 
     // Holds reference to device's camera.
     private Camera cam;
@@ -99,11 +103,13 @@ public class StrobeFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In onCreate()");
 
-        // Restore state is there is one
+        // Restore state is there is one.
         if (savedInstanceState != null) {
-
             if (Const.DEBUG) Log.v(TAG, "savedInstanceState != null, restoring state...");
-
+            strobeRate = savedInstanceState.getLong(SAVED_ST_KEY_STROBE_RATE);
+            flashLegth = savedInstanceState.getLong(SAVED_ST_KEY_FLASH_LENGTH);
+            if (Const.DEBUG) Log.v(TAG, "restored to strobeRate = " + strobeRate +
+                    ", flashLegth = " + flashLegth);
         }
     }
 
@@ -123,14 +129,18 @@ public class StrobeFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
+                if (Const.DEBUG) Log.v(TAG, "In onProgressChanged(), seekbar = " + seekBar +
+                        ", progress = " + progress);
+
                 if (seekBar == strobeSb) {
-                    StrobeFragment.this.strobeRate = (100 - progress) * 10 + 40;
+                    strobeRate = (100 - progress) * 10 + 40;
                 } else if (seekBar == flashSb){
-                    StrobeFragment.this.flashLegth = (100 - progress) * 10 + 30;
+                    flashLegth = (100 - progress) * 10 + 30;
                 }
 
                 if (Const.DEBUG) Log.v(TAG, "In onProgressChanged(), Thread = " +
-                        Thread.currentThread().getName() + ", strobeRate = " + strobeRate);
+                        Thread.currentThread().getName() + ", strobeRate = " + strobeRate +
+                        ", flashLegth = " + flashLegth);
 
             }
 
@@ -174,6 +184,10 @@ public class StrobeFragment extends Fragment {
 
                 try {
                     while (true) {
+                        if (Const.DEBUG) Log.v(TAG, "In run(), Thread = " +
+                                Thread.currentThread().toString() + ", strobeRate = " + strobeRate +
+                                ", flashLegth = " + flashLegth);
+
                         lightOn(true);
                         Thread.sleep(flashLegth);
                         lightOn(false);
@@ -204,8 +218,11 @@ public class StrobeFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState()");
+        if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState(), saving state:\n" +
+                "strobeRate = " + strobeRate + ", flashLegth = " + flashLegth);
 
+        outState.putLong(SAVED_ST_KEY_FLASH_LENGTH, flashLegth);
+        outState.putLong(SAVED_ST_KEY_STROBE_RATE, strobeRate);
     }
 
     @Override
@@ -303,6 +320,8 @@ public class StrobeFragment extends Fragment {
         this.dlgNoFlash = builder.create();
         this.dlgNoFlash.show();
     }
+
+    public String getTAG() { return TAG; }
 
     /***********************************************************************************************
      *                                  INTERFACES
