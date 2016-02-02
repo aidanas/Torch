@@ -1,8 +1,13 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Styles for the app defined here -->
     <style name="AppTheme" parent="Theme.AppCompat">
-        <!-- Customize your theme here. -->
+        <!-- Set of application wide styles go here.-->
+    </style>
+
+    <!--Navigation drawer menu items-->
+    <style name="nav_draw_item_style">
+       <item name="android:background">@drawable/ls_selector</item>
     </style>
 
 </resources>

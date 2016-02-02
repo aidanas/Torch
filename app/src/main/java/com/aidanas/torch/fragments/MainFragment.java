@@ -2,10 +2,10 @@ package com.aidanas.torch.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -145,21 +145,31 @@ public class MainFragment extends CommonFrag {
                     if (Const.DEBUG) Log.v(TAG, "In onClick(), isLightOn = " + isLightOn);
 
                     // Toggle the flash.
-                    if (isLightOn) {
+                    if (isLightOn) {    // Turns the light ON!
 
                         lightOn(!isLightOn);
 
-                        // Restore orientation.
+                        // Unlock the orientation
                         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
                         btn.setText(R.string.ma_btn_txt_lights_up);
                         isLightOn = false;
 
-                    } else {
+                    } else {    //Turns the light OFF!
 
                         // Save current orientation of the screen and lock to it.
-                        oldOrientation = getActivity().getRequestedOrientation();
-                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+//                        oldOrientation = getActivity().getRequestedOrientation();
+//                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
+                        // Get current orientation and lock to it.
+//                        if (oldOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+//                        }
+//                        else {
+//                            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+//                        }
+                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+
 
                         lightOn(!isLightOn);
 

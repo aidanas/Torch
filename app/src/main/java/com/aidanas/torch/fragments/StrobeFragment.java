@@ -40,8 +40,13 @@ public class StrobeFragment extends CommonFrag {
     // Holds reference to device's camera.
     private Camera cam;
 
-    private long strobeRate = 1040L; // Initial value
-    private long flashLegth = 1030L;   // Initial value
+    /*
+     * These two variable will be read by UI thread and written to by background "strobe" thread.
+     * "volatile" makes writes and reads atomic. Note: for our purposes there is no need for the
+     * "Synchronised" block.
+     */
+    volatile private long strobeRate = 1040L;   // Initial value
+    volatile private long flashLegth = 1030L;   // Initial value
 
     // Views
     private View root;

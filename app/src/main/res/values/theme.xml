@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="app_theme" parent="Theme.AppCompat">
+        <!-- Set of application wide styles go here.-->
+    </style>
+</resources>
