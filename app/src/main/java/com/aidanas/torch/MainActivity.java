@@ -5,10 +5,12 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -38,42 +40,39 @@ public class MainActivity extends AppCompatActivity
     // Tag for debug.
     private final String TAG = this.getClass().getSimpleName();
 
-    // This might be used in 'auto on' feature in the setting menu is to be implemented.
-//    private final boolean paramsToMainFragAutoOn = false;
-
-    private List<String> mDrawerTitles;
+    // Views os the activity.
     private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
+
+    // Navigation drawer item titles.
+    private List<String> mDrawerTitles = Arrays.asList(getResources().
+            getStringArray(R.array.nav_drawer_titles));
+
+    // Action bar default and navdraw open titles.
+    private CharSequence mDrawerTitle = "Default";
+    private CharSequence mTitle = "Menu";
+
+    // Selected item in the navigation drawer.
     private int mSelectedItem = AdapterView.INVALID_POSITION; // By default no items selected.
 
+    // Camera whose flash is going to be used.
     private Camera mCam;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (Const.DEBUG) Log.v(TAG, "In onCreate(), savedInstanceState = " + savedInstanceState);
 
         setContentView(R.layout.activity_main_drawnav);
 
-        mDrawerTitles = Arrays.asList(getResources().getStringArray(R.array.nav_drawer_titles));
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList   = (ListView) findViewById(R.id.left_drawer);
-
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.navdraw_list_item_layout, mDrawerTitles));
-
-        mDrawerList.setAdapter(new NavDrawLsAdapter(this, mDrawerTitles));
-
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        createNavDrawer();
 
         FragmentManager fManager = getFragmentManager();
 
         // Find fragment or create a new one.
         Fragment frag = fManager.findFragmentByTag(MainFragment.TAG);
-
 
         if (savedInstanceState != null){
             selectItem(savedInstanceState.getInt(NAV_DRAW_SELECTED_POS));
@@ -84,12 +83,21 @@ public class MainActivity extends AppCompatActivity
             getFragmentManager().beginTransaction().replace(R.id.ma_navdraw_content_frame, frag,
                     MainFragment.TAG).commit();
         }
+
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        if (Const.DEBUG) Log.v(TAG, "In onPostCreate");
+
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
         this.mCam = getCamera();
@@ -98,7 +106,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-
         if (Const.DEBUG) Log.v(TAG, "In onResume()");
 
     }
@@ -106,7 +113,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-
         if (Const.DEBUG) Log.v(TAG, "In onPause()");
 
     }
@@ -114,7 +120,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
 
         releaseCamera();
@@ -122,7 +127,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         if (Const.DEBUG) Log.v(TAG, "In onCreateOptionsMenu()");
 
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -133,14 +137,21 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         if (Const.DEBUG) Log.v(TAG, "In onOptionsItemSelected()");
+
+        /*
+         * Pass the event to ActionBarDrawerToggle, if it returns true,
+         * then it has handled the app icon touch event.
+         */
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
 
         int id = item.getItemId();
 
         switch (id) {
             case R.id.action_about:
-                  showAboutDialog();
+                showAboutDialog();
         }
 
         return super.onOptionsItemSelected(item);
@@ -149,7 +160,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState(), mSelectedItem = " + mSelectedItem);
 
         // Save current selected item in the nav drawer.
@@ -161,14 +171,74 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         if (Const.DEBUG) Log.v(TAG, "In onDestroy()");
 
     }
 
-    /****************************************************
+    /**
+     * This and onPostCreate() requred in our case for the navigation drawer to open/close upon
+     * home/up button clicked.
+     * @param newConfig - New configuration.
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    /***********************************************************************************************
      * Only Android live cycle methods above this point!
-     ****************************************************/
+     **********************************************************************************************/
+
+    /**
+     * Method to take care of the navigation bar setup logic performed in onCreate() method.
+     * Also takes care of the home button on the action bar and its functionality.
+     */
+    private void createNavDrawer() {
+        if (Const.DEBUG) Log.v(TAG, "In createNavDrawer()");
+
+        // Get nav draw views.
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList   = (ListView) findViewById(R.id.left_drawer);
+
+        // Set the adapter for the list view.
+        mDrawerList.setAdapter(new ArrayAdapter<>(this,
+                R.layout.navdraw_list_item_layout, mDrawerTitles));
+
+        mDrawerList.setAdapter(new NavDrawLsAdapter(this, mDrawerTitles));
+
+        // Set the list's click listener.
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
+                R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getActionBar().setTitle(mTitle);
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getActionBar().setTitle(mDrawerTitle);
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        // Enable home button to be used for nav drawer open/close function.
+        ActionBar ab = getActionBar();
+        if (ab != null){
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
+    }
 
     /**
      * Method configures instantiates and displays a dialog displaying the information
