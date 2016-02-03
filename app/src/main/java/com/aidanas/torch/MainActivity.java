@@ -1,5 +1,6 @@
 package com.aidanas.torch;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -83,6 +85,9 @@ public class MainActivity extends AppCompatActivity
             getFragmentManager().beginTransaction().replace(R.id.ma_navdraw_content_frame, frag,
                     MainFragment.TAG).commit();
         }
+
+        // Prevent the device from going to sleep.
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
 
@@ -173,6 +178,8 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         if (Const.DEBUG) Log.v(TAG, "In onDestroy()");
 
+        // Allow the device to go to sleep.
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     /**
@@ -226,6 +233,11 @@ public class MainActivity extends AppCompatActivity
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+
+                // Save current title for restoration after the drawer is closed.
+                ActionBar ab = getSupportActionBar();
+                if (ab != null) mTitle = ab.getTitle();
+
                 setTitle(mDrawerTitle);
             }
         };
@@ -251,8 +263,18 @@ public class MainActivity extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.about_dialog_title);
 
-        // Single button ('OK') dialog.
-        builder.setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
+        // Rate this App button, opens Playstore to rate this app.
+        builder.setPositiveButton(R.string.rate_app, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("market://details?id=" +
+                        MainActivity.this.getPackageName()));
+                startActivity(intent);
+            }
+        });
+
+        // Cancel, button.
+        builder.setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.cancel();
             }
@@ -311,12 +333,18 @@ public class MainActivity extends AppCompatActivity
 
         // Highlight the selected item, update the title, and close the drawer
         mDrawerList.setItemChecked(position, true);
-        setTitle(mDrawerTitles.get(position));
+        mTitle = mDrawerTitles.get(position);
+        setTitle(mTitle);
+
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
+    /**
+     * Method to set the ActionBar title.
+     * @param title - New title.
+     */
     @Override
-    public void setTitle(CharSequence title) { //TODO: check where this is used and call it.
+    public void setTitle(CharSequence title) {
         ActionBar ab = getSupportActionBar();
         if (ab != null) ab.setTitle(title);
     }

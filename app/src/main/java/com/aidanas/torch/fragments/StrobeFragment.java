@@ -20,18 +20,17 @@ import com.aidanas.torch.interfaces.CommonFrag;
 
 /**
  * @author Aidanas Tamasauskas
+ * Created on: 03-02-2016
  *
- * Fragment to hold the LED ON/OFF logic
+ * This fragment contains the logicto make that binking light.
+ * It creates a background thread which periodically turns the LED on and off with varying intervals
+ * in between the ON and OFF commands.
+ *
  */
 public class StrobeFragment extends CommonFrag {
 
     // Tag.
     public static final String TAG = StrobeFragment.class.getSimpleName();
-
-
-    // Above flags bundle access identifier.
-    private static final String IS_LIGHT_ON = "Is light on?";
-    private static final String OLD_ORIENTATION = "Old screen orientation";
 
     private static final String SAVED_ST_KEY_STROBE_RATE  = "strobe rate";
     private static final String SAVED_ST_KEY_FLASH_LENGTH = "flash length";
