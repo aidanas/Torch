@@ -183,6 +183,9 @@ public class StrobeFragment extends CommonFrag {
 
         if (Const.DEBUG) Log.v(TAG, "In onResume(), Thread = " + Thread.currentThread().getName());
 
+        /*
+         * Launch a separate thread to toggle the LED ON/OFF, so it would not stall the UI thread.
+         */
         strobeThread = new Thread(new Runnable() {
             public void run() {
                 if (Const.DEBUG) Log.v(TAG, "In run(), Thread = " + Thread.currentThread().getName());
@@ -280,7 +283,7 @@ public class StrobeFragment extends CommonFrag {
     }
 
     /**
-     * Method to toggle light on/off
+     * Method to toggle light on`/off
      * @param should true to turn on or false to turn off.
      */
     private void lightOn(boolean should) {
@@ -326,6 +329,10 @@ public class StrobeFragment extends CommonFrag {
         this.dlgNoFlash.show();
     }
 
+    /**
+     * Returns a string representing the TAG for this class. Used by fragment manager.
+     * @return - Fragments' tag.
+     */
     public String getTAG() { return TAG; }
 
     /***********************************************************************************************
