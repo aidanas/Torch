@@ -36,7 +36,7 @@ public class StrobeFragment extends CommonFrag {
     private static final String SAVED_ST_KEY_FLASH_LENGTH = "flash length";
 
     // Holds reference to device's camera.
-    private Camera cam;
+    private Camera mCam;
 
     /*
      * Light on and off duration in milliseconds. Not guaranteed to be precise as the implementation
@@ -151,7 +151,7 @@ public class StrobeFragment extends CommonFrag {
 
                 if (seekBar == strobeSb) {
                     strobeRate = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER + STROBE_RATE_VAL_OFFSET;
-                } else if (seekBar == flashSb){
+                } else if (seekBar == flashSb) {
                     flashLegth = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER + FLASH_LENGTH_VAL_OFFSET;
                 }
 
@@ -185,8 +185,8 @@ public class StrobeFragment extends CommonFrag {
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
         // Attach to the camera in advance.
-        if (this.cam == null)
-            this.cam = mListener.getCameraFromActivity();
+        if (this.mCam == null)
+            this.mCam = mListener.getCameraFromActivity();
     }
 
     @Override
@@ -251,7 +251,7 @@ public class StrobeFragment extends CommonFrag {
 
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
 
-        this.cam = null;
+        this.mCam = null;
     }
 
     @Override
@@ -265,7 +265,7 @@ public class StrobeFragment extends CommonFrag {
             dlgNoFlash = null;
         }
     }
-    
+
 
     @Override
     public void onDetach() {
@@ -275,9 +275,9 @@ public class StrobeFragment extends CommonFrag {
         mListener = null;
     }
 
-     /****************************************************
-      * Only Android live cycle methods above this point!
-      ****************************************************/
+    /****************************************************
+     * Only Android live cycle methods above this point!
+     ****************************************************/
 
     /**
      * MEthod to check the availability of camera flash.
@@ -299,25 +299,36 @@ public class StrobeFragment extends CommonFrag {
      * @param should true to turn on or false to turn off.
      */
     private void lightOn(boolean should) {
-
         if (Const.DEBUG) Log.v(TAG, "In lightOn(), should = " + should);
 
         /*
-         * Toggle camera's flash.
+         * As this method is called from the background thread it is possible that the device camera
+         * is not yet initiated. Especially after configuration change event.
          */
-        if (should){
-            try {
-                Camera.Parameters p = cam.getParameters();
+        if (mCam == null) return;
+
+        /*
+         * Null pointer exception may be thrown here since the mCam object is accessed by both
+         * background and UI threads. When the strobe rate is high and configuration change occurs
+         * mCam might not be yet initialised by UI thread. I know, it is a dirty hack but it does
+         * the job until we figure out the proper approach.
+         */
+        try {
+            /*
+             * Toggle camera's flash.
+             */
+            if (should){
+                Camera.Parameters p = mCam.getParameters();
                 p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                cam.setParameters(p);
-            } catch (Exception e) {
-                Log.e(getString(R.string.app_name), "failed to open Camera");
-                e.printStackTrace();
+                mCam.setParameters(p);
+            } else {
+                Camera.Parameters p = mCam.getParameters();
+                p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                mCam.setParameters(p);
             }
-        } else {
-            Camera.Parameters p = this.cam.getParameters();
-            p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-            this.cam.setParameters(p);
+        } catch (Exception e) { //TODO: null pointer exceptions should be avoided not cached.
+            Log.e(getString(R.string.app_name), "failed to open Camera");
+            e.printStackTrace();
         }
     }
 
