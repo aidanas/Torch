@@ -17,3 +17,8 @@ Features:
 * Does not disappear the morning after.
 
 Seriously... It's a torch. Nothing more, nothing less.
+
+The app can be downloaded form the Google Play Store:
+
+<a href="https://play.google.com/store/apps/details?id=com.aidanas.torch&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img height="100" width="300" alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" /></a>
+
