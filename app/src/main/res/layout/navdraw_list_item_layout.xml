@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@drawable/ls_selector">
+
+    <TextView
+        android:id="@+id/nav_draw_item_title_tw"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:textSize="20sp"
+        android:gravity="center_vertical"
+        android:padding="10dp">
+
+    </TextView>
+</RelativeLayout>

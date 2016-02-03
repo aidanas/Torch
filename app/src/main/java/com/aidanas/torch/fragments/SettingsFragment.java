@@ -13,7 +13,7 @@ import com.aidanas.torch.R;
 
 
 /**
- * Settings fragment.
+ * Settings fragment. //TODO: implement when needed.
  *
  * @author Aidanas Tamasauskas
  * @date 2015

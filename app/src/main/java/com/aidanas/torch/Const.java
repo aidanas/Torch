@@ -6,5 +6,10 @@ package com.aidanas.torch;
  */
 public final class Const {
 
-    public static boolean DEBUG = true;
+    /*
+     * The debug flag. Enables features which only should be present in a debug version of the app,
+     * features such as verbose log output.
+     * Must be set to FALSE on release version.
+     */
+    public static boolean DEBUG = false;
 }

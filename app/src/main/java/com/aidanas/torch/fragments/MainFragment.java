@@ -1,11 +1,11 @@
 package com.aidanas.torch.fragments;
 
+import android.app.Activity;
 import android.app.Dialog;
-import android.app.Fragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,13 +18,14 @@ import android.widget.Button;
 
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
+import com.aidanas.torch.interfaces.CommonFrag;
 
 /**
  * @author Aidanas Tamasauskas
  *
  * Fragment to hold the LED ON/OFF logic
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends CommonFrag {
 
     // Tag.
     public static final String TAG = MainFragment.class.getSimpleName();
@@ -35,7 +36,7 @@ public class MainFragment extends Fragment {
 
     // Above flags bundle access identifier.
     private static final String IS_LIGHT_ON = "Is light on?";
-    private static final String OLD_ORIENTATION = "Old screen orientation";
+//    private static final String OLD_ORIENTATION = "Old screen orientation";
 
     // Holds reference to device's camera.
     private Camera cam;
@@ -78,7 +79,7 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(Activity context) {
         super.onAttach(context);
 
         if (Const.DEBUG) Log.v(TAG, "In onAttach()");
@@ -111,7 +112,7 @@ public class MainFragment extends Fragment {
             if (Const.DEBUG) Log.v(TAG, "savedInstanceState != null, restoring state...");
 
             isLightOn = savedInstanceState.getBoolean(IS_LIGHT_ON);
-            oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
+//            oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
         }
     }
 
@@ -134,6 +135,10 @@ public class MainFragment extends Fragment {
             if (isLightOn)
                 btn.setText(R.string.ma_btn_txt_lights_down);
 
+            /*
+             * Anonymous button click listener toggles the light ON/OFF and deals deals with
+             * orientation locking.
+             */
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -141,26 +146,16 @@ public class MainFragment extends Fragment {
                     if (Const.DEBUG) Log.v(TAG, "In onClick(), isLightOn = " + isLightOn);
 
                     // Toggle the flash.
-                    if (isLightOn) {
+                    if (isLightOn) {    // Turns the light ON!
 
                         lightOn(!isLightOn);
-
-                        // Restore orientation.
-                        getActivity().setRequestedOrientation(oldOrientation);
-
                         btn.setText(R.string.ma_btn_txt_lights_up);
                         isLightOn = false;
 
-                    } else {
-
-                        // Save current orientation of the screen and lock to it.
-                        oldOrientation = getActivity().getRequestedOrientation();
-                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+                    } else {            //Turns the light OFF!
 
                         lightOn(!isLightOn);
-
                         btn.setText(R.string.ma_btn_txt_lights_down);
-
                         isLightOn = true;
 
                     }
@@ -181,7 +176,7 @@ public class MainFragment extends Fragment {
 
         // Attach to the camera in advance.
         if (this.cam == null)
-            this.cam = getCamera();
+            this.cam = mListener.getCameraFromActivity();
     }
 
     @Override
@@ -207,7 +202,7 @@ public class MainFragment extends Fragment {
         if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState()");
 
         outState.putBoolean(IS_LIGHT_ON, isLightOn);
-        outState.putInt(OLD_ORIENTATION, oldOrientation);
+//        outState.putInt(OLD_ORIENTATION, oldOrientation);
     }
 
     @Override
@@ -216,7 +211,10 @@ public class MainFragment extends Fragment {
 
         if (Const.DEBUG) Log.v(TAG, "In onStop(), isLightOn = " + isLightOn);
         lightOn(false);
-        releaseCamera();
+        this.cam = null;
+
+        // Unlock orientation.
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
     @Override
@@ -230,7 +228,6 @@ public class MainFragment extends Fragment {
             dlgNoFlash = null;
         }
     }
-    
 
     @Override
     public void onDetach() {
@@ -240,9 +237,11 @@ public class MainFragment extends Fragment {
         mListener = null;
     }
 
-     /****************************************************
-      * Only Android live cycle methods above this point!
-      ****************************************************/
+
+    /***********************************************************************************************
+     *                       Only Android live cycle methods above this point!
+     **********************************************************************************************/
+
 
     /**
      * MEthod to check the availability of camera flash.
@@ -251,7 +250,8 @@ public class MainFragment extends Fragment {
      */
     private boolean hasCameraFlash() {
 
-        boolean hasCameraFlash = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+        boolean hasCameraFlash = getActivity().getPackageManager().
+                hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
 
         if (Const.DEBUG) Log.v(TAG, "In hasCameraFlash(), camera flash" +
                 ((hasCameraFlash) ? "" : " NOT") + " detected!");
@@ -260,7 +260,8 @@ public class MainFragment extends Fragment {
     }
 
     /**
-     * Method to toggle light on/off
+     * Method to toggle light on/off.
+     * TODO: This duplicates with StrobeFragment class' method.
      * @param should true to turn on or false to turn off.
      */
     private void lightOn(boolean should) {
@@ -284,37 +285,37 @@ public class MainFragment extends Fragment {
             p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             this.cam.setParameters(p);
         }
-    }
 
-
-    /**
-     * Method to get and configure camera. Should improve improve user experience due to quicker
-     * response time to "Lights ON" request.
-     *
-     * @return main camera of a device.
-     */
-    public Camera getCamera(){
-        if (Const.DEBUG) Log.v(TAG, "In getCamera()");
-
-        // Open, start and return a camera object.
-        Camera cam = Camera.open();
-        cam.startPreview();
-        return cam;
+        lockOrientation(should);
     }
 
     /**
-     * Release camera if it is used at the moment.
+     * MEthod to lock/unlock the orientation of the screen.
+     * @param orientLock - True if the orientation should be locked to the current one, false
+     *                  otherwise.
      */
-    private void releaseCamera() {
-        if (Const.DEBUG) Log.v(TAG, "In releaseCamera(), this.cam = " + this.cam);
+    private void lockOrientation(boolean orientLock) {
 
-        if (this.cam != null) {
-            this.cam.stopPreview();
-            this.cam.release();
-            this.cam = null;
+        if (Const.DEBUG) Log.v(TAG, "In lockOrientation(), orientLock = " + orientLock);
+
+        if (orientLock){
+            // Save current orientation of the screen and lock to it.
+//                        oldOrientation = getActivity().getRequestedOrientation();
+//                        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
+            // Get current orientation and lock to it.
+//                        if (oldOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+//                        }
+//                        else {
+//                            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+//                        }
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+        } else {
+            // Unlock the orientation
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
     }
-
 
     /**
      * Method to inform the user that their device has no required hardware (camera flash) and exit.
@@ -336,10 +337,11 @@ public class MainFragment extends Fragment {
         this.dlgNoFlash.show();
     }
 
+    public String getTAG() { return TAG; }
+
     /***********************************************************************************************
      *                                  INTERFACES
      **********************************************************************************************/
-
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -350,9 +352,12 @@ public class MainFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
+
     public interface OnMainFragmentInteractionListener {
-        // TODO: Update argument type and name
+
         void onMainFragmentInteraction(Uri uri);
+
+        Camera getCameraFromActivity();
     }
 
 }
