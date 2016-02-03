@@ -1,6 +1,6 @@
 package com.aidanas.torch;
 
-import android.app.ActionBar;
+import android.support.v7.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -46,12 +46,11 @@ public class MainActivity extends AppCompatActivity
     private ListView mDrawerList;
 
     // Navigation drawer item titles.
-    private List<String> mDrawerTitles = Arrays.asList(getResources().
-            getStringArray(R.array.nav_drawer_titles));
+    private List<String> mDrawerTitles;
 
     // Action bar default and navdraw open titles.
-    private CharSequence mDrawerTitle = "Default";
-    private CharSequence mTitle = "Menu";
+    private CharSequence mDrawerTitle = "Menu";
+    private CharSequence mTitle = "Torch";
 
     // Selected item in the navigation drawer.
     private int mSelectedItem = AdapterView.INVALID_POSITION; // By default no items selected.
@@ -67,6 +66,7 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main_drawnav);
 
+        // Deals with navigation drawer creation and setup including action bar config.
         createNavDrawer();
 
         FragmentManager fManager = getFragmentManager();
@@ -201,6 +201,9 @@ public class MainActivity extends AppCompatActivity
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList   = (ListView) findViewById(R.id.left_drawer);
 
+        mDrawerTitles = Arrays.asList(getResources().
+                getStringArray(R.array.nav_drawer_titles));
+
         // Set the adapter for the list view.
         mDrawerList.setAdapter(new ArrayAdapter<>(this,
                 R.layout.navdraw_list_item_layout, mDrawerTitles));
@@ -210,8 +213,6 @@ public class MainActivity extends AppCompatActivity
         // Set the list's click listener.
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
                 R.string.drawer_close) {
@@ -219,13 +220,13 @@ public class MainActivity extends AppCompatActivity
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getActionBar().setTitle(mTitle);
+                setTitle(mTitle);
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                getActionBar().setTitle(mDrawerTitle);
+                setTitle(mDrawerTitle);
             }
         };
 
@@ -233,10 +234,11 @@ public class MainActivity extends AppCompatActivity
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         // Enable home button to be used for nav drawer open/close function.
-        ActionBar ab = getActionBar();
+        ActionBar ab = getSupportActionBar();
         if (ab != null){
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setHomeButtonEnabled(true);
+            ab.setDisplayShowTitleEnabled(true);
         }
     }
 
@@ -314,11 +316,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void setTitle(CharSequence title) {
-        ActionBar ab = getActionBar();
-        if (ab != null){
-            getActionBar().setTitle(title);
-        }
+    public void setTitle(CharSequence title) { //TODO: check where this is used and call it.
+        ActionBar ab = getSupportActionBar();
+        if (ab != null) ab.setTitle(title);
     }
 
     /**
