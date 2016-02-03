@@ -2,6 +2,8 @@
 
     <!-- THEME. A set of styles for the app defined here -->
     <style name="AppTheme" parent="Theme.AppCompat">
+        <item name="android:actionBarStyle">@style/ActionBar</item>
+        <item name="actionBarStyle">@style/ActionBar</item>
         <!-- Set of application wide styles go here.-->
     </style>
 
@@ -9,6 +11,11 @@
     <!--Navigation drawer menu items-->
     <style name="nav_draw_item_style">
        <item name="android:background">@drawable/ls_selector</item>
+    </style>
+
+    <style name="ActionBar" >
+        <item name="android:background">@color/colour_sch1_colour3</item>
+        <item name="background">@color/colour_sch1_colour3</item>
     </style>
 
 </resources>
