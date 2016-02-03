@@ -1,10 +1,11 @@
 <resources>
 
-    <!-- Styles for the app defined here -->
+    <!-- THEME. A set of styles for the app defined here -->
     <style name="AppTheme" parent="Theme.AppCompat">
         <!-- Set of application wide styles go here.-->
     </style>
 
+    <!-- Separate styles defined here -->
     <!--Navigation drawer menu items-->
     <style name="nav_draw_item_style">
        <item name="android:background">@drawable/ls_selector</item>

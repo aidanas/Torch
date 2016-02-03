@@ -2,7 +2,6 @@ package com.aidanas.torch.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
@@ -41,12 +40,23 @@ public class StrobeFragment extends CommonFrag {
     private Camera cam;
 
     /*
+     * Light on and off duration in milliseconds. Not guaranteed to be precise as the implementation
+     * uses Thread.sleep().
      * These two variable will be read by UI thread and written to by background "strobe" thread.
      * "volatile" makes writes and reads atomic. Note: for our purposes there is no need for the
      * "Synchronised" block.
      */
     volatile private long strobeRate = 1040L;   // Initial value
     volatile private long flashLegth = 1030L;   // Initial value
+
+    /*
+     * Constants to adjust the durations of the light ON and OFF periods. Used with following:
+     * strobeRate = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER + STROBE_RATE_VAL_OFFSET
+     */
+    private static final int SEEKBAR_MAX_VALUE = 100;
+    private static final int SEEKBAR_VAL_MULTIPLIER = 10;
+    private static final int STROBE_RATE_VAL_OFFSET = 40;
+    private static final int FLASH_LENGTH_VAL_OFFSET = 30;
 
     // Views
     private View root;
@@ -126,10 +136,13 @@ public class StrobeFragment extends CommonFrag {
 
         // Inflate the layout for this fragment
         root = inflater.inflate(R.layout.fragment_strobe, container, false);
-        SeekBar.OnSeekBarChangeListener seekBarOListener;
-        strobeSb = (SeekBar) root.findViewById(R.id.strobe_frag_strobe_seekbar);
-        flashSb = (SeekBar) root.findViewById(R.id.strobe_frag_flash_duration_seekbar);
 
+        /*
+         * Two seek bars and their on change listener.
+         */
+        flashSb = (SeekBar) root.findViewById(R.id.strobe_frag_light_off_sb);
+        strobeSb = (SeekBar) root.findViewById(R.id.strobe_frag_light_on_sb);
+        SeekBar.OnSeekBarChangeListener seekBarOListener;
         strobeSb.setOnSeekBarChangeListener(seekBarOListener = new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -138,9 +151,9 @@ public class StrobeFragment extends CommonFrag {
                         ", progress = " + progress);
 
                 if (seekBar == strobeSb) {
-                    strobeRate = (100 - progress) * 10 + 40;
+                    strobeRate = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER + STROBE_RATE_VAL_OFFSET;
                 } else if (seekBar == flashSb){
-                    flashLegth = (100 - progress) * 10 + 30;
+                    flashLegth = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER + FLASH_LENGTH_VAL_OFFSET;
                 }
 
                 if (Const.DEBUG) Log.v(TAG, "In onProgressChanged(), Thread = " +
