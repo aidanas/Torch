@@ -35,5 +35,6 @@
     <string-array name="nav_drawer_titles">
         <item>Torch</item>
         <item>Strobe</item>
+        <item>Morse</item>
     </string-array>
 </resources>

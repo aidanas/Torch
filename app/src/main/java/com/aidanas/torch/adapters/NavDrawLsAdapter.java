@@ -13,8 +13,10 @@ import com.aidanas.torch.R;
 import java.util.List;
 
 /**
- * Created by Aidanas
+ * Created by Aidanas Tamasauskas
  * Created on 14/01/2016.
+ *
+ * Custom ListVew ArrayAdapter. Must be used with: layout/navdraw_list_item_layout.xml
  */
 public class NavDrawLsAdapter extends BaseAdapter {
 

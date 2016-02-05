@@ -275,9 +275,9 @@ public class StrobeFragment extends CommonFrag {
         mListener = null;
     }
 
-    /****************************************************
-     * Only Android live cycle methods above this point!
-     ****************************************************/
+    /***********************************************************************************************
+     *                            Only Android live cycle methods above this point!
+     **********************************************************************************************/
 
     /**
      * MEthod to check the availability of camera flash.
@@ -286,7 +286,8 @@ public class StrobeFragment extends CommonFrag {
      */
     private boolean hasCameraFlash() {
 
-        boolean hasCameraFlash = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+        boolean hasCameraFlash = getActivity().getPackageManager().
+                hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
 
         if (Const.DEBUG) Log.v(TAG, "In hasCameraFlash(), camera flash" +
                 ((hasCameraFlash) ? "" : " NOT") + " detected!");
