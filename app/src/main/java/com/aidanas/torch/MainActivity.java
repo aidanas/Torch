@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.aidanas.torch.adapters.NavDrawLsAdapter;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
+    private LinearLayout mDrawerContent;
 
     // Navigation drawer item titles.
     private List<String> mDrawerTitles;
@@ -205,8 +207,9 @@ public class MainActivity extends AppCompatActivity
         if (Const.DEBUG) Log.v(TAG, "In createNavDrawer()");
 
         // Get nav draw views.
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList   = (ListView) findViewById(R.id.left_drawer);
+        mDrawerLayout  = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList    = (ListView) findViewById(R.id.left_drawer);
+        mDrawerContent = (LinearLayout) findViewById(R.id.nav_draw_content_ll);
 
         mDrawerTitles = Arrays.asList(getResources().
                 getStringArray(R.array.nav_drawer_titles));
@@ -336,7 +339,7 @@ public class MainActivity extends AppCompatActivity
         mTitle = mDrawerTitles.get(position);
         setTitle(mTitle);
 
-        mDrawerLayout.closeDrawer(mDrawerList);
+        mDrawerLayout.closeDrawer(mDrawerContent);
     }
 
     /**
