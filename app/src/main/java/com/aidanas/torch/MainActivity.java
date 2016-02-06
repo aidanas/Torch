@@ -25,6 +25,7 @@ import android.widget.ListView;
 
 import com.aidanas.torch.adapters.NavDrawLsAdapter;
 import com.aidanas.torch.fragments.MainFragment;
+import com.aidanas.torch.fragments.MorseFragment;
 import com.aidanas.torch.fragments.StrobeFragment;
 import com.aidanas.torch.interfaces.CommonFrag;
 
@@ -36,7 +37,8 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity
         implements MainFragment.OnMainFragmentInteractionListener,
-        StrobeFragment.OnStrobeFragmentInteractionListener{
+        StrobeFragment.OnStrobeFragmentInteractionListener,
+        MorseFragment.OnMorseFragInteractionListener{
 
     private static final String NAV_DRAW_SELECTED_POS = "selected item";
 
@@ -289,20 +291,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-
-        // For logging purposes.
-        private final String TAG = this.getClass().getSimpleName();
-
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id) {
-
-            if (Const.DEBUG) Log.v(TAG, "In onItemClick(), position = " + position);
-
-            selectItem(position);
-        }
-    }
-
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
 
@@ -320,6 +308,10 @@ public class MainActivity extends AppCompatActivity
             case 1:
                 frag = (CommonFrag) fragmentManager.findFragmentByTag(StrobeFragment.TAG);
                 if (frag == null ) frag = StrobeFragment.newInstance(false);
+                break;
+            case 2:
+                frag = (CommonFrag) fragmentManager.findFragmentByTag(MorseFragment.TAG);
+                if (frag == null ) frag = MorseFragment.newInstance(null);
                 break;
             default:
                 Log.e(TAG, "Default case of switch statement. THis should have never happened. O_o");
@@ -350,20 +342,6 @@ public class MainActivity extends AppCompatActivity
     public void setTitle(CharSequence title) {
         ActionBar ab = getSupportActionBar();
         if (ab != null) ab.setTitle(title);
-    }
-
-    /**
-     * Interface implementation method to do with MainFragment communication.
-     * @param uri
-     */
-    @Override
-    public void onMainFragmentInteraction(Uri uri) {
-        return;
-    }
-
-    @Override
-    public void onStrobeFragmentInteraction(Uri uri) {
-        return;
     }
 
     @Override
@@ -398,4 +376,45 @@ public class MainActivity extends AppCompatActivity
             this.mCam = null;
         }
     }
+
+    /***********************************************************************************************
+     *                                  INTERFACE IMPLEMENTATIONS
+     **********************************************************************************************/
+
+    /**
+     * Interface implementation method to do with MainFragment communication.
+     * @param uri
+     */
+    @Override
+    public void onMainFragmentInteraction(Uri uri) { return; }
+
+    @Override
+    public void onStrobeFragmentInteraction(Uri uri) {
+        return;
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) { return; }
+
+    /***********************************************************************************************
+     *                                         Private Classes
+     **********************************************************************************************/
+
+    /**
+     * Navigation drawer click listener.
+     */
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+
+        // For logging purposes.
+        private final String TAG = this.getClass().getSimpleName();
+
+        @Override
+        public void onItemClick(AdapterView parent, View view, int position, long id) {
+
+            if (Const.DEBUG) Log.v(TAG, "In onItemClick(), position = " + position);
+
+            selectItem(position);
+        }
+    }
+
 }

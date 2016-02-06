@@ -1,0 +1,62 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.aidanas.torch.fragments.MorseFragment"
+    android:padding="20dp"
+    android:background="#0000ff">
+
+    <TextView
+        android:id="@+id/morse_frag_transmitting_tw"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:inputType="none"
+        android:maxLength="@integer/max_morse_length"
+        android:text="TRAMSNMITTING sample text"
+        />
+
+    <EditText
+        android:id="@+id/morse_frag_txt_to_transmit_tw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_text_to_transmit"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:inputType="textCapCharacters"
+        android:maxLength="@integer/max_morse_length"
+        />
+
+    <Button
+        android:id="@+id/morse_frag_transmit_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:text="@string/transmit"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/ls_selector"
+        />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_below="@id/morse_frag_txt_to_transmit_tw"
+        android:padding="10dp"
+        android:background="#00ff00"
+        >
+
+        <SeekBar
+            android:id="@+id/morse_frag_transmitsion_rate_sb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:rotation="270"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="#ff0000"
+            />
+
+    </RelativeLayout>
+</RelativeLayout>
