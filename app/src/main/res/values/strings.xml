@@ -41,4 +41,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="transmit">Transmit</string>
     <string name="enter_text_to_transmit">Enter text to transmit...</string>
+    <string name="enter_text_here">Enter text here.</string>
 </resources>

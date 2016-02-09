@@ -7,10 +7,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
 import com.aidanas.torch.interfaces.CommonFrag;
+import com.aidanas.torch.morsetools.MoTranslator;
 
 /**
  * @author Aidanas Tamasauskas
@@ -23,12 +25,18 @@ public class MorseFragment extends CommonFrag {
     // Tag.
     public static final String TAG = MorseFragment.class.getSimpleName();
 
+    //TODO: this is debug string.
+    private static final String TEST_TXT = "ABCDE";
+
     private static final String ARG_PARAM1 = "param1";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
 
     private OnMorseFragInteractionListener mListener;
+
+    private View mRoot;
+    private EditText mUesrsText;
 
     public MorseFragment() {
         // Required empty public constructor
@@ -58,6 +66,9 @@ public class MorseFragment extends CommonFrag {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
         }
+
+        Log.v(TAG, "Translating text " + TEST_TXT + "\n" + "translated: " +
+                MoTranslator.translateToMorse(TEST_TXT));
     }
 
     @Override
@@ -66,7 +77,18 @@ public class MorseFragment extends CommonFrag {
         if (Const.DEBUG) Log.v(TAG, "In onCreateView()");
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_morse, container, false);
+        mRoot = inflater.inflate(R.layout.fragment_morse, container, false);
+        mUesrsText = (EditText) mRoot.findViewById(R.id.morse_frag_txt_to_transmit_tw);
+
+        mRoot.findViewById(R.id.morse_frag_transmit_btn)
+                .setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        return mRoot;
     }
 
     @Override
