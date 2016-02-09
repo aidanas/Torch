@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.aidanas.torch.fragments.MorseFragment"
-    android:padding="20dp">
+    android:padding="20dp"
+    >
 
     <TextView
         android:id="@+id/morse_frag_transmitting_tw"
@@ -14,33 +15,41 @@
         android:layout_alignParentTop="true"
         android:inputType="none"
         android:maxLength="@integer/max_morse_length"
-        android:hint="@string/enter_text_here"
+        android:hint="@string/transmitted_txt"
         />
 
     <EditText
         android:id="@+id/morse_frag_txt_to_transmit_tw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/enter_text_to_transmit"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:inputType="textCapCharacters"
         android:maxLength="@integer/max_morse_length"
+        android:hint="@string/enter_txt_here"
         />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/morse_frag_transmitsion_rate_sb"
+        android:text="@string/speed"
+        android:inputType="none"/>
 
     <SeekBar
         android:id="@+id/morse_frag_transmitsion_rate_sb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_below="@+id/morse_frag_txt_to_transmit_tw"
+        android:layout_above="@id/morse_frag_transmit_btn"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="10dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         />
 
     <Button
         android:id="@+id/morse_frag_transmit_btn"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:padding="20dp"
         android:text="@string/transmit"
