@@ -9,4 +9,5 @@
 # Built application files
 *.apk
 
+# Android sutdio settings.
 *.iml
