@@ -60,6 +60,7 @@ public class MoTranslator {
 
     public static Map<Character, boolean[]> alphabeth = new HashMap<>();
 
+    // Generate letters and number for the dictionary.
     static {
 
         // Add letters.
@@ -73,6 +74,5 @@ public class MoTranslator {
             if (Const.DEBUG) Log.v(TAG, "Generating Morse dictionary " + ch);
             alphabeth.put(ch, moLettersArr[ch - 'A']);
         }
-
     }
 }
