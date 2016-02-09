@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     tools:context="com.aidanas.torch.fragments.MorseFragment"
     android:padding="20dp"
+    android:background="@color/colour_sch1_colour5"
     >
 
     <TextView
