@@ -22,4 +22,30 @@ public class MoLetter {
         this.ch = ch;
         this.moLetter = moLetter;
     }
+
+    //TODO: necessary?
+
+//    /**
+//     * Method returns the size of the letter (number of true/false terms.)
+//     * @return - Size of the letter.
+//     */
+//    public int getSize(){
+//        return moLetter.length;
+//    }
+
+    /**
+     * Getter for a Mosrse code representation of this letter.
+     * @return - Morse code letter represented as an array of true/false values.
+     */
+    public boolean[] getMoLetter() {
+        return moLetter;
+    }
+
+    /**
+     * Method to obtain the ASKII char which this object represent.
+     * @return - ASKII character.
+     */
+    public char getChar(){
+        return this.ch;
+    }
 }

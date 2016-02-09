@@ -11,3 +11,8 @@
 
 # Android sutdio settings.
 *.iml
+
+# Archives
+*.7z
+*.zip
+
