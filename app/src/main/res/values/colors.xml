@@ -2,8 +2,8 @@
 <resources>
     <color name="ls_bg_normal_grad_st">@color/colour_sch1_colour3</color>
     <color name="ls_bg_normal_grad_end">@color/colour_sch1_colour4</color>
-    <color name="ls_bg_pressed_grad_st">@color/colour_sch1_colour2</color>
-    <color name="ls_bg_pressed_grad_end">@color/colour_sch1_colour3</color>
+    <color name="ls_bg_pressed_grad_st">@color/colour_sch1_colour1</color>
+    <color name="ls_bg_pressed_grad_end">@color/colour_sch1_colour2</color>
     <color name="ls_bg">#88000000</color>
     <color name="ls_divider">#00000000</color>
 
