@@ -1,9 +1,10 @@
 package com.aidanas.torch.morsetools;
 
-import android.os.Looper;
+import android.util.Log;
+
+import com.aidanas.torch.Const;
 
 import java.util.List;
-import java.util.logging.Handler;
 
 /**
  * Created by: Aidanas Tamasauskas
@@ -13,12 +14,25 @@ import java.util.logging.Handler;
  */
 public class Transmitter {
 
-    // Morse code frequency base in milliseconds.
-    private static final long BASE = 500L;
+    // Tag.
+    public static final String TAG = Transmitter.class.getSimpleName();
+
+    /*
+     * Time length used in all calculations as the base. Each modification of mBase will use BASE as
+     * the unit upn which culations will be made.
+     */
+    public static final long BASE = 200L;
+
+    /*
+     * Morse code frequency mBase in milliseconds. Must be initialised.
+     * Needs to be atomic as it would be read/written my multiple threads.
+     */
+    private volatile long mBase;
+
 
     // Pause duration between words and characters in milliseconds.
-    public static final long PAUSE_BETWEEN_CHARS = 3 * BASE;
-    public static final long PAUSE_BETWEEN_WORDS = 7 * BASE;
+    public static final long PAUSE_BETWEEN_CHARS = 3;
+    public static final long PAUSE_BETWEEN_WORDS = 7;
 
     // Number of DOTS in a DASH.
     public static final int DASH_MULTIPLIER = 3;
@@ -27,13 +41,15 @@ public class Transmitter {
     public static final boolean SIGNAL_ON  = true;
     public static final boolean SIGNAL_OFF = false;
 
-
+    // MIN/MAX values the supplied rate can have and its multiplier.
+    private static final int RATE_MIN = 1;
+    private static final int RATE_MAX = 100;
+    private static final int RATE_MULTIPLIER = 5;
 
     private final List<MoLetter> moTxt;
 
     private final SignalReceiver receiver;
 
-    private int transmissionRate;
 
     /**
      * Two arg constructor.
@@ -44,6 +60,7 @@ public class Transmitter {
     public Transmitter (SignalReceiver receiver, List<MoLetter> moTxt){
         this.receiver = receiver;
         this.moTxt = moTxt;
+        setTransmissionRate(1); // Initial transmission rate. SLOWEST
     }
 
     /**
@@ -52,7 +69,6 @@ public class Transmitter {
      */
     public void startTransmission() throws InterruptedException {
 
-        long unit = receiver.signalUnitSize();
         int jMax;
         MoLetter moLtr;
         boolean[] mLtr;
@@ -72,7 +88,7 @@ public class Transmitter {
                     receiver.signal(SIGNAL_ON);
 
                     // Keep the light on for a DASH (3 units) or a DOT (1 unit).
-                    Thread.sleep(mLtr[j] ? unit * DASH_MULTIPLIER * BASE : unit * BASE);
+                    Thread.sleep(mLtr[j] ? DASH_MULTIPLIER * mBase : mBase);
 
                     receiver.signal(SIGNAL_OFF);
 
@@ -80,19 +96,34 @@ public class Transmitter {
                  * Signal off duration between signals of THE SAME LETTER is 1 unit.
                  * Ignore if it is the last signal of this letter.
                  */
-                    if (j < jMax) Thread.sleep(unit * BASE);
+                    if (j < jMax - 1) {
+                        if (Const.DEBUG) Log.v(TAG, "TESTING! SAME LETTER pause!");
+                        Thread.sleep(mBase);
+                    }
                 }
 
-                // Pause for a letter or a word.
-                if (moLtr.getChar() == ' '){
-                    Thread.sleep(unit * PAUSE_BETWEEN_WORDS);
+                // Pause for a letter or a word. If its the end of a string then do a word pause.
+                if (moLtr.getChar() == ' ' || i >= moTxt.size() - 1){
+                    if (Const.DEBUG) Log.v(TAG, "TESTING! WORD pause!");
+                    Thread.sleep(PAUSE_BETWEEN_WORDS * mBase);
                 } else {
-                    Thread.sleep(unit * PAUSE_BETWEEN_CHARS);
+                    if (Const.DEBUG) Log.v(TAG, "TESTING! CHAR pause!");
+                    Thread.sleep(PAUSE_BETWEEN_CHARS * mBase);
                 }
             }
-            // Pause between words and repeat the whole text again.
-            Thread.sleep(unit * PAUSE_BETWEEN_WORDS);
         }
+    }
+
+    /**
+     * Method to ajust the speed of transmission.
+     * @param rate - Integer in range 1 - 100.
+     */
+    protected void setTransmissionRate(int rate){
+        if (rate < RATE_MIN || rate > RATE_MAX) return;
+
+        mBase = BASE + Math.abs((rate-RATE_MAX)*RATE_MULTIPLIER);
+        if (Const.DEBUG) Log.v(TAG, "In setTransmissionRate() new mBase = " + mBase);
+
     }
 
     /***********************************************************************************************
@@ -111,11 +142,6 @@ public class Transmitter {
          */
         void signal (boolean type);
 
-        /**
-         * The method will be called frequentlly to obtain the size of the transmission unit.
-         * @return - Length of a single transmission unit.
-         */
-        int signalUnitSize();
     }
 
 }

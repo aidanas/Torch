@@ -23,8 +23,9 @@
         android:id="@+id/morse_frag_txt_to_transmit_tw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
+        android:layout_above="@+id/morse_frag_transmitsion_rate_sb"
+        android:layout_marginBottom="50dp"
         android:inputType="textCapCharacters"
         android:maxLength="@integer/max_morse_length"
         android:hint="@string/enter_txt_here"
@@ -46,6 +47,7 @@
         android:layout_marginTop="10dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:max="100"
         />
 
     <Button

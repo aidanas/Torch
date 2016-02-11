@@ -41,7 +41,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="transmit">Transmit</string>
     <string name="enter_text_to_transmit">Enter text to transmit...</string>
-    <string name="speed">Speed</string>
-    <string name="transmitted_txt">Transmitted text</string>
+    <string name="speed">Transmission speed:</string>
+    <string name="transmitted_txt">Transmitting text</string>
     <string name="enter_txt_here">Enter text here...</string>
 </resources>

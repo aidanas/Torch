@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.aidanas.torch.interfaces.CameraProvider;
@@ -51,9 +52,10 @@ public class MorseFragment extends CommonFrag {
     private View mRoot;
     private EditText mUserText;
     private TextView mTextTransmitting;
+    private SeekBar mSeekBar;
 
     // Thread which will do the signaling.
-    private Thread mTransThread;
+    private TransmissionThread mTransThread;
 
     public MorseFragment() {
         // Required empty public constructor
@@ -122,10 +124,13 @@ public class MorseFragment extends CommonFrag {
 
         // Inflate the layout for this fragment and get view references.
         mRoot = inflater.inflate(R.layout.fragment_morse, container, false);
+        mSeekBar = (SeekBar) mRoot.findViewById(R.id.morse_frag_transmitsion_rate_sb);
         mUserText = (EditText) mRoot.findViewById(R.id.morse_frag_txt_to_transmit_tw);
         mTextTransmitting = (TextView) mRoot.findViewById(R.id.morse_frag_transmitting_tw);
 
-        // Button click listener will initiate the transmission.
+        /*
+         * Button click listener will initiate the transmission.
+         */
         mRoot.findViewById(R.id.morse_frag_transmit_btn)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -150,6 +155,25 @@ public class MorseFragment extends CommonFrag {
                         mTransThread.start();
                     }
                 });
+
+        /*
+         * Setup the listener for transmission rate seek bar.
+         */
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (Const.DEBUG) Log.v("OnSeekBarChangeListener", "progress = " + progress);
+
+                if (mTransThread != null && fromUser) mTransThread.updateSignalUnit(progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {} // Not used
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}  // Not used
+        });
 
         return mRoot;
     }

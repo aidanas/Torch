@@ -68,9 +68,12 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
         lightOn(signalType);
     }
 
-    @Override
-    public int signalUnitSize() {
-        return 1; //TODO: this must be linked with the slide bar.
+    /**
+     * Method so set the transmission rate.
+     * @param unit - Integer in range 1 - 100.
+     */
+    public void updateSignalUnit(int unit){
+        mTransmitter.setTransmissionRate(unit);
     }
 
     /**
