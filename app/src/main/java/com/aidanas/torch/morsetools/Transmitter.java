@@ -13,8 +13,21 @@ import java.util.logging.Handler;
  */
 public class Transmitter {
 
-    private static final int PAUSE_BETWEEN_CHARS = 3;
-    private static final int PAUSE_BETWEEN_WORDS = 7;
+    // Morse code frequency base in milliseconds.
+    private static final long BASE = 500L;
+
+    // Pause duration between words and characters in milliseconds.
+    public static final long PAUSE_BETWEEN_CHARS = 3 * BASE;
+    public static final long PAUSE_BETWEEN_WORDS = 7 * BASE;
+
+    // Number of DOTS in a DASH.
+    public static final int DASH_MULTIPLIER = 3;
+
+    // Just for readability.
+    public static final boolean SIGNAL_ON  = true;
+    public static final boolean SIGNAL_OFF = false;
+
+
 
     private final List<MoLetter> moTxt;
 
@@ -38,7 +51,7 @@ public class Transmitter {
      */
     public void startTransmission() throws InterruptedException {
 
-        int unit = receiver.signalUnitSize();
+        long unit = receiver.signalUnitSize();
         int jMax;
         MoLetter moLtr;
         boolean[] mLtr;
@@ -49,10 +62,12 @@ public class Transmitter {
             mLtr  = moLtr.getMoLetter();
             jMax = mLtr.length;
 
-            // For every dot/dash oth this letter...
+            // For every dot/dash of this letter...
             for (int j = 0 ; j < jMax ; j++ ) {
-                receiver.signal(mLtr[j]);
-                Thread.sleep(unit);
+                receiver.signal(SIGNAL_ON);
+                // Keep the light on for a DASH or a DOT.
+                Thread.sleep(mLtr[j] ? unit * DASH_MULTIPLIER * BASE : unit * BASE);
+                receiver.signal(SIGNAL_OFF);
             }
 
             // Pause for a letter or a word.

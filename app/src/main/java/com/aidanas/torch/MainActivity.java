@@ -35,8 +35,8 @@ import java.util.List;
 /**
  * Main activity class. This activity shall allow a user to turn the flash of a the camera on ir off.
  */
-public class MainActivity extends AppCompatActivity
-        implements MainFragment.OnMainFragmentInteractionListener,
+public class MainActivity extends AppCompatActivity implements
+        MainFragment.OnMainFragmentInteractionListener,
         StrobeFragment.OnStrobeFragmentInteractionListener,
         MorseFragment.OnMorseFragInteractionListener{
 
@@ -344,11 +344,6 @@ public class MainActivity extends AppCompatActivity
         if (ab != null) ab.setTitle(title);
     }
 
-    @Override
-    public android.hardware.Camera getCameraFromActivity(){
-        return this.mCam;
-    }
-
     /**
      * Method to get and configure camera. Should improve improve user experience due to quicker
      * response time to "Lights ON" request.
@@ -381,20 +376,23 @@ public class MainActivity extends AppCompatActivity
      *                                  INTERFACE IMPLEMENTATIONS
      **********************************************************************************************/
 
+    @Override
+    public Camera getDeviceCamera(){
+        return this.mCam;
+    }
+
     /**
-     * Interface implementation method to do with MainFragment communication.
+     * Interface implementations for comunication with fragments. Not used at the moment.
      * @param uri
      */
     @Override
     public void onMainFragmentInteraction(Uri uri) { return; }
 
     @Override
-    public void onStrobeFragmentInteraction(Uri uri) {
-        return;
-    }
+    public void onStrobeFragmentInteraction(Uri uri) { return; }
 
     @Override
-    public void onFragmentInteraction(Uri uri) { return; }
+    public void onMorseFragmentInteraction(Uri uri) { return; }
 
     /***********************************************************************************************
      *                                         Private Classes

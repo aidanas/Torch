@@ -1,6 +1,7 @@
 package com.aidanas.torch.fragments;
 
 import android.content.Context;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,11 +9,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import com.aidanas.torch.CameraProvider;
 import com.aidanas.torch.Const;
+import com.aidanas.torch.MainActivity;
 import com.aidanas.torch.R;
 import com.aidanas.torch.interfaces.CommonFrag;
 import com.aidanas.torch.morsetools.MoTranslator;
+import com.aidanas.torch.morsetools.TransmissionThread;
+import com.aidanas.torch.morsetools.Transmitter;
 
 /**
  * @author Aidanas Tamasauskas
@@ -35,8 +41,16 @@ public class MorseFragment extends CommonFrag {
 
     private OnMorseFragInteractionListener mListener;
 
+    // Device's camera whose flash will be used for signaling.
+    private Camera mCam;
+
+    // Views.
     private View mRoot;
-    private EditText mUesrsText;
+    private EditText mUserText;
+    private TextView mTextTransmitting;
+
+    // Thread which will do the signaling.
+    private Thread mTransThread;
 
     public MorseFragment() {
         // Required empty public constructor
@@ -76,19 +90,35 @@ public class MorseFragment extends CommonFrag {
                              Bundle savedInstanceState) {
         if (Const.DEBUG) Log.v(TAG, "In onCreateView()");
 
-        // Inflate the layout for this fragment
+        // Inflate the layout for this fragment and get view references.
         mRoot = inflater.inflate(R.layout.fragment_morse, container, false);
-        mUesrsText = (EditText) mRoot.findViewById(R.id.morse_frag_txt_to_transmit_tw);
+        mUserText = (EditText) mRoot.findViewById(R.id.morse_frag_txt_to_transmit_tw);
+        mTextTransmitting = (TextView) mRoot.findViewById(R.id.morse_frag_transmitting_tw);
 
         mRoot.findViewById(R.id.morse_frag_transmit_btn)
                 .setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                    @Override
+                    public void onClick(View v) {
+                        if (Const.DEBUG) Log.v(TAG, "In onClick()");
 
-            }
-        });
+                        // If we are transmitting, then cease doing so.
+                        if (mTransThread != null) {
+                            mTransThread.interrupt();
+                            mTransThread = null;
+                        }
+
+                        mTransThread = new TransmissionThread(this, )
+                    }
+                });
 
         return mRoot;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Const.DEBUG) Log.v(TAG, "In onStart()");
+
     }
 
     @Override
@@ -122,17 +152,10 @@ public class MorseFragment extends CommonFrag {
      **********************************************************************************************/
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * This interface ensures that the fragment will be able to obtain a Camera object to use.
      */
-    public interface OnMorseFragInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    public interface OnMorseFragInteractionListener extends CameraProvider{
+        void onMorseFragmentInteraction(Uri uri);
     }
+
 }

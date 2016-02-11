@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.aidanas.torch.CameraProvider;
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
 import com.aidanas.torch.interfaces.CommonFrag;
@@ -176,7 +177,7 @@ public class MainFragment extends CommonFrag {
 
         // Attach to the camera in advance.
         if (this.cam == null)
-            this.cam = mListener.getCameraFromActivity();
+            this.cam = mListener.getDeviceCamera();
     }
 
     @Override
@@ -353,11 +354,8 @@ public class MainFragment extends CommonFrag {
      * >Communicating with Other Fragments</a> for more information.
      */
 
-    public interface OnMainFragmentInteractionListener {
-
+    public interface OnMainFragmentInteractionListener extends CameraProvider {
         void onMainFragmentInteraction(Uri uri);
-
-        Camera getCameraFromActivity();
     }
 
 }
