@@ -1,10 +1,10 @@
 package com.aidanas.torch;
 
 import android.content.Intent;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.hardware.Camera;
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements
         // Deals with navigation drawer creation and setup including action bar config.
         createNavDrawer();
 
-        FragmentManager fManager = getFragmentManager();
+        FragmentManager fManager = getSupportFragmentManager();
 
         // Find fragment or create a new one.
         Fragment frag = fManager.findFragmentByTag(MainFragment.TAG);
@@ -86,13 +86,14 @@ public class MainActivity extends AppCompatActivity implements
         else {
             frag = MainFragment.newInstance(false);
             // Load main fragment into the main activity frame
-            getFragmentManager().beginTransaction().replace(R.id.ma_navdraw_content_frame, frag,
-                    MainFragment.TAG).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.ma_navdraw_content_frame,
+                    frag, MainFragment.TAG).commit();
         }
 
         // Prevent the device from going to sleep.
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        this.mCam = getCamera();
     }
 
     @Override
@@ -108,8 +109,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
-
-        this.mCam = getCamera();
     }
 
     @Override
@@ -130,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
-
-        releaseCamera();
     }
 
     @Override
@@ -181,6 +178,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         if (Const.DEBUG) Log.v(TAG, "In onDestroy()");
+
+        releaseCamera();
 
         // Allow the device to go to sleep.
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -297,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements
         if (Const.DEBUG) Log.v(TAG, "In selectItem, position = " + position);
 
         CommonFrag frag;
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
         // Create a fragment depending on users' selection.
         switch (position){

@@ -7,6 +7,8 @@ import android.util.Log;
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
 
+import java.util.List;
+
 /**
  * Created by Aidanas
  * Created on 11/02/2016.
@@ -32,12 +34,11 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
      * Conatructor.
      * @param context - Context in which this thread will be run.
      * @param cam - Device camera object which flash will be used for signaling Morse code.
-     * @param transmitter - Fully set up transmitter which will be orchestrating the signalling.
      */
-    public TransmissionThread(Context context, Camera cam, Transmitter transmitter){
+    public TransmissionThread(Context context, Camera cam, List<MoLetter> txtInMorse){
         this.mContext = context;
         this.mCam = cam;
-        this.mTransmitter = transmitter;
+        mTransmitter = new Transmitter(this, txtInMorse);
     }
 
     /**
@@ -61,7 +62,9 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
      */
     @Override
     public void signal(boolean signalType) {
-        if (Const.DEBUG) Log.v(TAG, "In signal() received = " + signalType);
+        if (Const.DEBUG) Log.v(TAG, "In signal() received = " + signalType + ", Thread = " +
+                        Thread.currentThread().getName());
+
         lightOn(signalType);
     }
 

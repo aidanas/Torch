@@ -47,7 +47,8 @@ public class Transmitter {
     }
 
     /**
-     * Method to start signalling the receiver the morse code message stored in moTxt
+     * Method to start signalling the receiver the morse code message stored in moTxt.
+     * Method loops infinitely. Does NOT return!
      */
     public void startTransmission() throws InterruptedException {
 
@@ -56,26 +57,41 @@ public class Transmitter {
         MoLetter moLtr;
         boolean[] mLtr;
 
-        // For every letter in the Morse code string...
-        for (int i = 0 ; i < moTxt.size() ; i++){
-            moLtr = moTxt.get(i);
-            mLtr  = moLtr.getMoLetter();
-            jMax = mLtr.length;
+        // Loop indefinitely.
+        while (true) {
 
-            // For every dot/dash of this letter...
-            for (int j = 0 ; j < jMax ; j++ ) {
-                receiver.signal(SIGNAL_ON);
-                // Keep the light on for a DASH or a DOT.
-                Thread.sleep(mLtr[j] ? unit * DASH_MULTIPLIER * BASE : unit * BASE);
-                receiver.signal(SIGNAL_OFF);
-            }
+            // For every letter in the Morse code string...
+            for (int i = 0 ; i < moTxt.size() ; i++){
+                moLtr = moTxt.get(i);
+                mLtr  = moLtr.getMoLetter();
+                jMax = mLtr.length;
 
-            // Pause for a letter or a word.
-            if (moLtr.getChar() == ' '){
-                Thread.sleep(unit * PAUSE_BETWEEN_WORDS);
-            } else {
-                Thread.sleep(unit * PAUSE_BETWEEN_CHARS);
+                // For every dot/dash of this letter...
+                for (int j = 0 ; j < jMax ; j++ ) {
+
+                    receiver.signal(SIGNAL_ON);
+
+                    // Keep the light on for a DASH (3 units) or a DOT (1 unit).
+                    Thread.sleep(mLtr[j] ? unit * DASH_MULTIPLIER * BASE : unit * BASE);
+
+                    receiver.signal(SIGNAL_OFF);
+
+                /*
+                 * Signal off duration between signals of THE SAME LETTER is 1 unit.
+                 * Ignore if it is the last signal of this letter.
+                 */
+                    if (j < jMax) Thread.sleep(unit * BASE);
+                }
+
+                // Pause for a letter or a word.
+                if (moLtr.getChar() == ' '){
+                    Thread.sleep(unit * PAUSE_BETWEEN_WORDS);
+                } else {
+                    Thread.sleep(unit * PAUSE_BETWEEN_CHARS);
+                }
             }
+            // Pause between words and repeat the whole text again.
+            Thread.sleep(unit * PAUSE_BETWEEN_WORDS);
         }
     }
 
@@ -87,7 +103,7 @@ public class Transmitter {
      * Interface which the class instantiating this class must implement in order to receive signals
      * representing the text in morse code.
      */
-    interface SignalReceiver {
+    public interface SignalReceiver {
 
         /**
          * Methoid gets called every time the Morse code signalling occurs.

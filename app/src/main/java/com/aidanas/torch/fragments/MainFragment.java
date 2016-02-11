@@ -2,10 +2,10 @@ package com.aidanas.torch.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.aidanas.torch.CameraProvider;
+import com.aidanas.torch.interfaces.CameraProvider;
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
 import com.aidanas.torch.interfaces.CommonFrag;
@@ -80,10 +80,10 @@ public class MainFragment extends CommonFrag {
     }
 
     @Override
-    public void onAttach(Activity context) {
+    public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (Const.DEBUG) Log.v(TAG, "In onAttach()");
+        if (Const.DEBUG) Log.v(TAG, "In onAttach() (Context)");
 
         oldOrientation = getActivity().getRequestedOrientation();
 
@@ -176,8 +176,7 @@ public class MainFragment extends CommonFrag {
         if (Const.DEBUG) Log.v(TAG, "In onStart(), isLightOn = " + isLightOn);
 
         // Attach to the camera in advance.
-        if (this.cam == null)
-            this.cam = mListener.getDeviceCamera();
+        if (this.cam == null) this.cam = mListener.getDeviceCamera();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.aidanas.torch.interfaces;
 
-import android.app.Fragment;
+
+import android.support.v4.app.Fragment;
 
 /**
  * Created by: Aidanas Tamasauskas

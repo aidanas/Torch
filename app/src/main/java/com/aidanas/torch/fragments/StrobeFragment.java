@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 
-import com.aidanas.torch.CameraProvider;
+import com.aidanas.torch.interfaces.CameraProvider;
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
 import com.aidanas.torch.interfaces.CommonFrag;

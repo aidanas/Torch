@@ -1,4 +1,4 @@
-package com.aidanas.torch;
+package com.aidanas.torch.interfaces;
 
 import android.hardware.Camera;
 

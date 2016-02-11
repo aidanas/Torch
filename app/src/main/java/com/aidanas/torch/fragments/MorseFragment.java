@@ -1,5 +1,6 @@
 package com.aidanas.torch.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
 import android.net.Uri;
@@ -11,14 +12,16 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.aidanas.torch.CameraProvider;
+import com.aidanas.torch.interfaces.CameraProvider;
 import com.aidanas.torch.Const;
-import com.aidanas.torch.MainActivity;
 import com.aidanas.torch.R;
 import com.aidanas.torch.interfaces.CommonFrag;
+import com.aidanas.torch.morsetools.MoLetter;
 import com.aidanas.torch.morsetools.MoTranslator;
 import com.aidanas.torch.morsetools.TransmissionThread;
 import com.aidanas.torch.morsetools.Transmitter;
+
+import java.util.List;
 
 /**
  * @author Aidanas Tamasauskas
@@ -72,6 +75,33 @@ public class MorseFragment extends CommonFrag {
         return fragment;
     }
 
+
+    @Override
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        if (Const.DEBUG) Log.v(TAG, "In onAttach() (Activity)");
+
+        try {
+            mListener = (OnMorseFragInteractionListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnMorseFragInteractionListener");
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (Const.DEBUG) Log.v(TAG, "In onAttach() (Context)");
+
+        if (context instanceof OnMorseFragInteractionListener) {
+            mListener = (OnMorseFragInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnMorseFragInteractionListener");
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +125,7 @@ public class MorseFragment extends CommonFrag {
         mUserText = (EditText) mRoot.findViewById(R.id.morse_frag_txt_to_transmit_tw);
         mTextTransmitting = (TextView) mRoot.findViewById(R.id.morse_frag_transmitting_tw);
 
+        // Button click listener will initiate the transmission.
         mRoot.findViewById(R.id.morse_frag_transmit_btn)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -107,7 +138,16 @@ public class MorseFragment extends CommonFrag {
                             mTransThread = null;
                         }
 
-                        mTransThread = new TransmissionThread(this, )
+                        // Get the text from the user.
+                        String txt = mUserText.getText().toString();
+                        if (Const.DEBUG) Log.v(TAG, "txt to be translated: " + txt);
+
+                        // Translate the text to Morse code.
+                        List<MoLetter> txtInMorse = MoTranslator.translateToMorse(txt);
+
+                        // Background thread executing the transmission.
+                        mTransThread = new TransmissionThread(getActivity(), mCam, txtInMorse);
+                        mTransThread.start();
                     }
                 });
 
@@ -119,19 +159,19 @@ public class MorseFragment extends CommonFrag {
         super.onStart();
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
+        // Attach to the camera in advance.
+        if (this.mCam == null)
+            this.mCam = mListener.getDeviceCamera();
+
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public void onStop() {
+        super.onStop();
         if (Const.DEBUG) Log.v(TAG, "In onAttach()");
 
-        if (context instanceof OnMorseFragInteractionListener) {
-            mListener = (OnMorseFragInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnMorseFragInteractionListener");
-        }
+        // Stop the transmitting background thread if such exists.
+        if (mTransThread != null) mTransThread.interrupt();
     }
 
     @Override

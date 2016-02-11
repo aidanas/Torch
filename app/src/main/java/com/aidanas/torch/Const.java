@@ -11,5 +11,5 @@ public final class Const {
      * features such as verbose log output.
      * Must be set to FALSE on release version.
      */
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
 }
