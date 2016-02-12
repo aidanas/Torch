@@ -20,6 +20,9 @@ public class MoTranslator {
     // Tag.
     public static final String TAG = MoLetter.class.getSimpleName();
 
+    // Regex of acceptable patterns. A string must match fully if to be successfully translated.
+    public static final String VALID_REGEX = "^[A-Z0-9\\s]+$";
+
     private static boolean[][] moLettersArr = {
             {false, true},                  // A
             {true, false, false},           // B
@@ -76,6 +79,10 @@ public class MoTranslator {
             if (Const.DEBUG) Log.v(TAG, "Generating Morse numbers dictionary " + ch);
             dictionary.put(ch, moNumbersArr[ch - '0']);
         }
+
+        // Empty array for space.
+        dictionary.put(' ', new boolean[]{});
+
     }
 
     /**

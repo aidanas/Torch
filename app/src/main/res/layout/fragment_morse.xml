@@ -16,7 +16,6 @@
         android:layout_alignParentTop="true"
         android:inputType="none"
         android:maxLength="@integer/max_morse_length"
-        android:hint="@string/transmitted_txt"
         />
 
     <EditText

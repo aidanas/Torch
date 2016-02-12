@@ -77,7 +77,6 @@ public class Transmitter {
      */
     public void startTransmission() throws InterruptedException {
 
-        int jMax;
         MoLetter moLtr;
         boolean[] mLtr;
 
@@ -94,12 +93,11 @@ public class Transmitter {
             for ( ; i < moTxt.size() ; i++){
                 moLtr = moTxt.get(i);
                 mLtr  = moLtr.getMoLetter();
-                jMax = mLtr.length;
 
                 receiver.updateCurrentIndex(i);
 
                 // For every dot/dash of this letter...
-                for (int j = 0 ; j < jMax ; j++ ) {
+                for (int j = 0 ; j < mLtr.length ; j++ ) {
 
                     receiver.signal(SIGNAL_ON);
 
@@ -112,18 +110,26 @@ public class Transmitter {
                  * Signal off duration between signals of THE SAME LETTER is 1 unit.
                  * Ignore if it is the last signal of this letter.
                  */
-                    if (j < jMax - 1) {
-                        if (Const.DEBUG) Log.v(TAG, "TESTING! SAME LETTER pause!");
+                    if (j < mLtr.length - 1) {
+                        if (Const.DEBUG) Log.v(TAG, "SAME LETTER pause!");
                         Thread.sleep(mBase);
                     }
                 }
 
-                // Pause for a letter or a word. If its the end of a string then do a word pause.
-                if (moLtr.getChar() == ' ' || i >= moTxt.size() - 1){
-                    if (Const.DEBUG) Log.v(TAG, "TESTING! WORD pause!");
+                /*
+                 * Pause between letters or words or if its an end of the string.
+                 * Note: Last letter of a word does not fall into eny of the cases. It is handled
+                 * on the next iteration of the loop when (getChar() == ' ') becomes true.
+                 */
+                if (moLtr.getChar() == ' '){
+                    if (Const.DEBUG) Log.v(TAG, "WORD pause!");
                     Thread.sleep(PAUSE_BETWEEN_WORDS * mBase);
-                } else {
-                    if (Const.DEBUG) Log.v(TAG, "TESTING! CHAR pause!");
+                } else if (i >= moTxt.size() - 1){
+                    if (Const.DEBUG) Log.v(TAG, "WORD pause, End of String!");
+                    receiver.updateCurrentIndex(SignalReceiver.CLEAR_INDEX);
+                    Thread.sleep(PAUSE_BETWEEN_WORDS * mBase);
+                } else if (moTxt.get(i+1).getChar() != ' '){
+                    if (Const.DEBUG) Log.v(TAG, "CHAR pause!");
                     Thread.sleep(PAUSE_BETWEEN_CHARS * mBase);
                 }
             }
@@ -173,6 +179,8 @@ public class Transmitter {
      * representing the text in morse code.
      */
     public interface SignalReceiver {
+
+        int CLEAR_INDEX = -1;
 
         /**
          * Methoid gets called every time the Morse code signalling occurs.

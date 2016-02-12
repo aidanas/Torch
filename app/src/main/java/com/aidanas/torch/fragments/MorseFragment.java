@@ -2,9 +2,14 @@ package com.aidanas.torch.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +17,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.aidanas.torch.interfaces.CurrentIndexReceiver;
 import com.aidanas.torch.interfaces.CameraProvider;
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
@@ -29,7 +36,7 @@ import java.util.List;
  *
  * This fragment will be used to host the Morse code transmission UI.
  */
-public class MorseFragment extends CommonFrag {
+public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
 
     // Tag.
     public static final String TAG = MorseFragment.class.getSimpleName();
@@ -63,6 +70,7 @@ public class MorseFragment extends CommonFrag {
     // Parameters to transmitter.
     private boolean mIsTransmitting = false;
     private int mCurrenIndex = 0;
+    private String mTextToTransmit;
 
 
     /**
@@ -155,7 +163,13 @@ public class MorseFragment extends CommonFrag {
                     public void onClick(View v) {
                         if (Const.DEBUG) Log.v(TAG, "In onClick()");
 
-                        startTransmission(0);
+                        // Make sure users input is valid.
+                        if (mUserText.getText().toString().matches(MoTranslator.VALID_REGEX)) {
+                            startTransmission(0);
+                        } else {
+                            Toast.makeText(MorseFragment.this.getActivity(), "Invalid Text!",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
@@ -278,10 +292,11 @@ public class MorseFragment extends CommonFrag {
         List<MoLetter> txtInMorse = MoTranslator.translateToMorse(txt);
 
         // Display text to be transmitted in the status view.
+        mTextToTransmit = txt;
         mTextTransmitting.setText(txt);
 
         // Background thread executing the transmission.
-        mTransThread = new TransmissionThread(getActivity(), mCam, txtInMorse, mTextTransmitting);
+        mTransThread = new TransmissionThread(mCam, txtInMorse, mTextTransmitting, this);
 
         if (offset != 0) {
             mTransThread.setCurrentIndex(offset);
@@ -290,6 +305,34 @@ public class MorseFragment extends CommonFrag {
         mTransThread.updateSignalUnit(mSeekBar.getProgress());
         mTransThread.start();
         mIsTransmitting = true;
+    }
+
+    /***********************************************************************************************
+     *                                Interface Implementations
+     **********************************************************************************************/
+
+    /**
+     * Receives uypdates about the currently being transmitted character index in the text.
+     * @param index - Intex in the text.
+     */
+    @Override
+    public void newIndex(int index) {
+
+        if (index == -1){
+            mTextTransmitting.setText(mTextToTransmit);
+        } else {
+            SpannableString ss = new SpannableString(mTextToTransmit);
+
+            // Set the siZe of the teXt...
+            ss.setSpan(new RelativeSizeSpan(2f), index, index + 1, 0);
+
+            // ...and the colour.
+            ss.setSpan(new ForegroundColorSpan(getActivity().getResources()
+                    .getColor(R.color.colour_sch1_colour1)), index, index + 1, 0);
+            ss.setSpan(new BackgroundColorSpan(getActivity().getResources()
+                    .getColor(R.color.colour_sch1_colour4)), index, index + 1, 0);
+            mTextTransmitting.setText(ss);
+        }
     }
 
     /***********************************************************************************************

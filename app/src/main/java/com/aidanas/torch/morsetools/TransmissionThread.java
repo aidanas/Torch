@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
+import com.aidanas.torch.interfaces.CurrentIndexReceiver;
 
 import java.util.List;
 
@@ -23,9 +24,6 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
     // Tag.
     public static final String TAG = TransmissionThread.class.getSimpleName();
 
-    // Context in which the thread runs.
-    private final Context mContext;
-
     // Device camera whose flash will be used for signaling.
     private final Camera mCam;
 
@@ -35,6 +33,8 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
     // UI thread handler. Used to update views on the main thread.
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
+    private final CurrentIndexReceiver mIndexReceiver;
+
     // View, which will receive updates with currently transmitting index.
     private TextView mTextTransmitting;
 
@@ -43,17 +43,16 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
 
     /**
      * Constructor.
-     * @param context - Context in which this thread will be run.
      * @param cam - Device camera object which flash will be used for signaling Morse code.
      * @param txtInMorse - List of MoLetter objects.
      * @param textView - TextView to be updated while transmitting.
      */
-    public TransmissionThread(Context context, Camera cam, List<MoLetter> txtInMorse,
-                              TextView textView){
-        this.mContext = context;
-        this.mCam = cam;
-        this.mTextTransmitting = textView;
-        mTransmitter = new Transmitter(this, txtInMorse);
+    public TransmissionThread(Camera cam, List<MoLetter> txtInMorse, TextView textView,
+                              CurrentIndexReceiver indexReceiver){
+        mCam = cam;
+        mTextTransmitting = textView;
+        mIndexReceiver = indexReceiver;
+        mTransmitter   = new Transmitter(this, txtInMorse);
     }
 
     /**
@@ -133,7 +132,7 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
                 mCam.setParameters(p);
             }
         } catch (Exception e) { //TODO: null pointer exceptions should be avoided not cached.
-            Log.e(mContext.getString(R.string.app_name), "failed to open Camera");
+            Log.e(TAG, "failed to open Camera");
             e.printStackTrace();
         }
     }
@@ -193,7 +192,7 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
 
         @Override
         public void run() {
-            mTextTransmitting.setText("" + mmIndex);
+            mIndexReceiver.newIndex(mmIndex);
         }
     }
 }
