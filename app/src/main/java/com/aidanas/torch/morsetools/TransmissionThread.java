@@ -2,7 +2,10 @@ package com.aidanas.torch.morsetools;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
@@ -29,15 +32,27 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
     // Morse code transmitter.
     private final Transmitter mTransmitter;
 
+    // UI thread handler. Used to update views on the main thread.
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    // View, which will receive updates with currently transmitting index.
+    private TextView mTextTransmitting;
+
+    // Index of current letter. Read by UI thread, written by background.
+    private volatile int mCurrentIndex;
 
     /**
-     * Conatructor.
+     * Constructor.
      * @param context - Context in which this thread will be run.
      * @param cam - Device camera object which flash will be used for signaling Morse code.
+     * @param txtInMorse - List of MoLetter objects.
+     * @param textView - TextView to be updated while transmitting.
      */
-    public TransmissionThread(Context context, Camera cam, List<MoLetter> txtInMorse){
+    public TransmissionThread(Context context, Camera cam, List<MoLetter> txtInMorse,
+                              TextView textView){
         this.mContext = context;
         this.mCam = cam;
+        this.mTextTransmitting = textView;
         mTransmitter = new Transmitter(this, txtInMorse);
     }
 
@@ -52,28 +67,35 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
             if (Const.DEBUG) Log.v(TAG, "Thread = " + Thread.currentThread().getName() +
                     "interrupted");
             e.printStackTrace();
+            lightOn(false);
         }
     }
 
     /**
-     * Callback method for SignalReceiver interface. Receives signal from transmitter and delegates
-     * it to lightOn method.
-     * @param signalType - Signal on / Signal off.
+     * Method to chech if the thread's threads transmitter is currently transmitting.
+     * @return - True is signalling is currently active.
      */
-    @Override
-    public void signal(boolean signalType) {
-        if (Const.DEBUG) Log.v(TAG, "In signal() received = " + signalType + ", Thread = " +
-                        Thread.currentThread().getName());
-
-        lightOn(signalType);
+    public boolean isTransmitting(){
+        return mTransmitter.isTransmitting();
     }
 
     /**
-     * Method so set the transmission rate.
-     * @param unit - Integer in range 1 - 100.
+     * Method to obtain the index of currently being transmitted letter in the text.
+     * @return - Index of current letter.
      */
-    public void updateSignalUnit(int unit){
-        mTransmitter.setTransmissionRate(unit);
+    public int getCurrentIndex(){
+        return mCurrentIndex;
+    }
+
+    /**
+     * Method to indicate the required offset in the text as a beginning of the text. Especially
+     * usefull if the transmission was interupted and needed to be continued from a given point in
+     * text.
+     *
+     * @param index - The index in the text.
+     */
+    public void setCurrentIndex(int index){
+        mTransmitter.setOffset(index);
     }
 
     /**
@@ -113,6 +135,65 @@ public class TransmissionThread extends Thread implements Transmitter.SignalRece
         } catch (Exception e) { //TODO: null pointer exceptions should be avoided not cached.
             Log.e(mContext.getString(R.string.app_name), "failed to open Camera");
             e.printStackTrace();
+        }
+    }
+
+    /***********************************************************************************************
+     *                            Interface implementations
+     **********************************************************************************************/
+
+    /**
+     * Callback method for SignalReceiver interface. Receives signal from transmitter and delegates
+     * it to lightOn method.
+     * @param signalType - Signal on / Signal off.
+     */
+    @Override
+    public void signal(boolean signalType) {
+        if (Const.DEBUG) Log.v(TAG, "In signal() received = " + signalType + ", Thread = " +
+                Thread.currentThread().getName());
+
+        lightOn(signalType);
+    }
+
+    /**
+     * Method so set the transmission rate.
+     * @param unit - Integer in range 1 - 100.
+     */
+    public void updateSignalUnit(int unit){
+        mTransmitter.setTransmissionRate(unit);
+    }
+
+    /**
+     * Receives updates about currently transmitting letter index.
+     * @param index - Index of the letter in the text.
+     */
+    @Override
+    public void updateCurrentIndex(int index) {
+        mCurrentIndex = index;
+        mHandler.post(new StatusUpdater(index));
+    }
+
+    /***********************************************************************************************
+     *                          Inner Classes
+     **********************************************************************************************/
+
+    /**
+     * Runnable class to be posted on UI thread in order to update the status view.
+     */
+    private class StatusUpdater implements Runnable{
+
+        private int mmIndex;
+        /**
+         * Constructor.
+         * @param index - Index of the letter currently transmitting.
+         */
+        public StatusUpdater(int index){
+            this.mmIndex = index;
+        }
+
+        @Override
+        public void run() {
+            mTextTransmitting.setText("" + mmIndex);
         }
     }
 }

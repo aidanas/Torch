@@ -10,5 +10,19 @@ import android.hardware.Camera;
  * request.
  */
 public interface CameraProvider {
+
+    /**
+     * Get a camera object.
+     * @return - Camera.
+     */
     Camera getDeviceCamera();
+
+    /**
+     * Signals then camera not needed anymore. It is up to the implementation of the interface
+     * whether it actually gets released or not.
+     *
+     * @param - Camera to be released.
+     */
+    void releaseCamera(Camera cam);
+
 }

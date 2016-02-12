@@ -113,8 +113,8 @@ public class MainFragment extends CommonFrag {
             if (Const.DEBUG) Log.v(TAG, "savedInstanceState != null, restoring state...");
 
             isLightOn = savedInstanceState.getBoolean(IS_LIGHT_ON);
-//            oldOrientation = savedInstanceState.getInt(OLD_ORIENTATION);
         }
+        this.cam = mListener.getDeviceCamera();
     }
 
     @Override
@@ -175,16 +175,16 @@ public class MainFragment extends CommonFrag {
 
         if (Const.DEBUG) Log.v(TAG, "In onStart(), isLightOn = " + isLightOn);
 
-        // Attach to the camera in advance.
-        if (this.cam == null) this.cam = mListener.getDeviceCamera();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         if (Const.DEBUG) Log.v(TAG, "In onResume(), isLightOn = " + isLightOn);
 
+        // Attach to the camera in advance.
+        if (this.cam == null) this.cam = mListener.getDeviceCamera();
         lightOn(isLightOn);
     }
 
@@ -193,6 +193,8 @@ public class MainFragment extends CommonFrag {
         super.onPause();
 
         if (Const.DEBUG) Log.v(TAG, "In onPause(), isLightOn = " + isLightOn);
+        lightOn(false);
+        this.cam = null;
     }
 
     @Override
@@ -202,7 +204,6 @@ public class MainFragment extends CommonFrag {
         if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState()");
 
         outState.putBoolean(IS_LIGHT_ON, isLightOn);
-//        outState.putInt(OLD_ORIENTATION, oldOrientation);
     }
 
     @Override
@@ -210,8 +211,7 @@ public class MainFragment extends CommonFrag {
         super.onStop();
 
         if (Const.DEBUG) Log.v(TAG, "In onStop(), isLightOn = " + isLightOn);
-        lightOn(false);
-        this.cam = null;
+
 
         // Unlock orientation.
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);

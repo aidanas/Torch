@@ -64,10 +64,6 @@ public class StrobeFragment extends CommonFrag {
     private SeekBar flashSb;
 
     // The fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    // Dialogs
-    private Dialog dlgNoFlash;
-
-    // The fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
 
     private OnStrobeFragmentInteractionListener mListener;
@@ -186,8 +182,7 @@ public class StrobeFragment extends CommonFrag {
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
         // Attach to the camera in advance.
-        if (this.mCam == null)
-            this.mCam = mListener.getDeviceCamera();
+        if (mCam == null) mCam = mListener.getDeviceCamera();
     }
 
     @Override
@@ -251,20 +246,14 @@ public class StrobeFragment extends CommonFrag {
         super.onStop();
 
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
-
-        this.mCam = null;
+        lightOn(false);
+        mCam = null;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         if (Const.DEBUG) Log.v(TAG, "In onDestroy()");
-
-        if (dlgNoFlash != null) {
-            dlgNoFlash.cancel();
-            dlgNoFlash = null;
-        }
     }
 
 
@@ -332,26 +321,6 @@ public class StrobeFragment extends CommonFrag {
             Log.e(getString(R.string.app_name), "failed to open Camera");
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Method to inform the user that their device has no required hardware (camera flash) and exit.
-     */
-    private void noFlashAndBye() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
-        builder.setTitle(R.string.no_flash_found);
-
-        // Single button ('OK') dialog.
-        builder.setNegativeButton(R.string.OK, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
-                getActivity().finish();
-            }
-        });
-        builder.setCancelable(false);
-        builder.setView(getActivity().getLayoutInflater().inflate(R.layout.dialog_no_flash_found, null));
-        this.dlgNoFlash = builder.create();
-        this.dlgNoFlash.show();
     }
 
     /**

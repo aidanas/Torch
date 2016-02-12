@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements
         // Prevent the device from going to sleep.
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        this.mCam = getCamera();
     }
 
     @Override
@@ -109,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
+
+        this.mCam = getCamera();
     }
 
     @Override
@@ -129,6 +130,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
+
+        releaseCamera();
     }
 
     @Override
@@ -178,8 +181,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         if (Const.DEBUG) Log.v(TAG, "In onDestroy()");
-
-        releaseCamera();
 
         // Allow the device to go to sleep.
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -347,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements
      * Method to get and configure camera. Should improve improve user experience due to quicker
      * response time to "Lights ON" request.
      *
-     * @return main camera of a device.
+     * @return - Main camera of a device.
      */
     private Camera getCamera(){
         if (Const.DEBUG) Log.v(TAG, "In getCamera()");
@@ -379,6 +380,9 @@ public class MainActivity extends AppCompatActivity implements
     public Camera getDeviceCamera(){
         return this.mCam;
     }
+
+    @Override
+    public void releaseCamera(Camera cam){ releaseCamera(); }
 
     /**
      * Interface implementations for comunication with fragments. Not used at the moment.

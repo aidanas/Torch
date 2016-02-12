@@ -91,13 +91,14 @@ public class MoTranslator {
         List<MoLetter> moTxt = new ArrayList<>();
 
         char currentCh;
-        boolean[] morse;
+
         for (int i = 0 ; i < txt.length() ; i++){
             currentCh = txt.charAt(i);
 
             // Check if character has mapping to morse.
             if (!dictionary.containsKey(currentCh)){
-                throw new IllegalArgumentException("Unsupported characters in the string!");
+                throw new IllegalArgumentException("Unsupported characters in the string! ch = " +
+                        currentCh);
             }
 
             moTxt.add(i, new MoLetter(currentCh, dictionary.get(currentCh)));

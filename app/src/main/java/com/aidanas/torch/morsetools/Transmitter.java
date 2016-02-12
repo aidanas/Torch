@@ -10,7 +10,9 @@ import java.util.List;
  * Created by: Aidanas Tamasauskas
  * Created on: 09/02/2016
  *
- * Class to model a Morse code transmitter. It uses Camera and a list of MoLetters to signal.
+ * Class to model a Morse code transmitter. It uses Camera and a list of MoLetters to signal. Note
+ * that once started there are no means to stop the transmission other than interrupt the thread in
+ * which it is run. Therefore it should not be run on UI thread.
  */
 public class Transmitter {
 
@@ -50,6 +52,12 @@ public class Transmitter {
 
     private final SignalReceiver receiver;
 
+    // Starting index of the transmission.
+    private int mOffset = 0;
+
+    // Sets to true if it is currently in the process of signalling.
+    private volatile boolean mIsTransmitting = false;
+
 
     /**
      * Two arg constructor.
@@ -73,14 +81,22 @@ public class Transmitter {
         MoLetter moLtr;
         boolean[] mLtr;
 
+        // Initialise loop counter outside the loop as it must be reset after each full loop.
+        int i = mOffset;
+
         // Loop indefinitely.
         while (true) {
 
+            // Set the mode to 'Transmitting...'
+            mIsTransmitting = true;
+
             // For every letter in the Morse code string...
-            for (int i = 0 ; i < moTxt.size() ; i++){
+            for ( ; i < moTxt.size() ; i++){
                 moLtr = moTxt.get(i);
                 mLtr  = moLtr.getMoLetter();
                 jMax = mLtr.length;
+
+                receiver.updateCurrentIndex(i);
 
                 // For every dot/dash of this letter...
                 for (int j = 0 ; j < jMax ; j++ ) {
@@ -111,6 +127,8 @@ public class Transmitter {
                     Thread.sleep(PAUSE_BETWEEN_CHARS * mBase);
                 }
             }
+
+            i = 0; // From now on, loop from the beginning.
         }
     }
 
@@ -124,6 +142,26 @@ public class Transmitter {
         mBase = BASE + Math.abs((rate-RATE_MAX)*RATE_MULTIPLIER);
         if (Const.DEBUG) Log.v(TAG, "In setTransmissionRate() new mBase = " + mBase);
 
+    }
+
+    /**
+     * Method to set the starting position of the text to be transmitted. If none is set then the
+     * default value of 0 is used indicating that the transmission should begin at the beginning of
+     * the string.
+     * @param offset - Starting position of the transmission. If value supplied is greater than the
+     *               number of letters in the string then it is ignored and the default value used
+     *               instead.
+     */
+    protected void setOffset(int offset){
+        if (offset < moTxt.size()) this.mOffset = offset;
+    }
+
+    /**
+     * Method to check if the transmitter is currently engaged in transmission.
+     * @return - True if the transmitter is currently transmitting.
+     */
+    protected boolean isTransmitting(){
+        return this.mIsTransmitting;
     }
 
     /***********************************************************************************************
@@ -141,6 +179,12 @@ public class Transmitter {
          * @param type - True for DASH or false for DOT.
          */
         void signal (boolean type);
+
+        /**
+         * Callback method to receive updates about the index of currently transmitting letter.
+         * @param index - Index of the letter in the text.
+         */
+        void updateCurrentIndex(int index);
 
     }
 

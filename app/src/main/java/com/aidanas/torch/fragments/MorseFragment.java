@@ -20,7 +20,6 @@ import com.aidanas.torch.interfaces.CommonFrag;
 import com.aidanas.torch.morsetools.MoLetter;
 import com.aidanas.torch.morsetools.MoTranslator;
 import com.aidanas.torch.morsetools.TransmissionThread;
-import com.aidanas.torch.morsetools.Transmitter;
 
 import java.util.List;
 
@@ -40,6 +39,10 @@ public class MorseFragment extends CommonFrag {
 
     private static final String ARG_PARAM1 = "param1";
 
+    // Keys for save Bundle access.
+    private static final String IS_TRANSMITTING = "is transmitting?";
+    private static final String CURRENT_INDEX   = "current letter";
+
     // TODO: Rename and change types of parameters
     private String mParam1;
 
@@ -57,9 +60,15 @@ public class MorseFragment extends CommonFrag {
     // Thread which will do the signaling.
     private TransmissionThread mTransThread;
 
-    public MorseFragment() {
-        // Required empty public constructor
-    }
+    // Parameters to transmitter.
+    private boolean mIsTransmitting = false;
+    private int mCurrenIndex = 0;
+
+
+    /**
+     * No param empty constructor.
+     */
+    public MorseFragment() {}
 
     /**
      * Use this factory method to create a new instance of
@@ -109,8 +118,17 @@ public class MorseFragment extends CommonFrag {
         super.onCreate(savedInstanceState);
         if (Const.DEBUG) Log.v(TAG, "In onCreate()");
 
+        // Get args, as set by the factory.
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
+        }
+
+        // Get previous state if exists.
+        if (savedInstanceState != null){
+            mIsTransmitting = savedInstanceState.getBoolean(IS_TRANSMITTING);
+            mCurrenIndex    = savedInstanceState.getInt(CURRENT_INDEX);
+            Log.v(TAG, "Sate RESTORED:\nmIsTransmitting = " + mIsTransmitting +
+                    ", mCurrenIndex = " + mCurrenIndex);
         }
 
         Log.v(TAG, "Translating text " + TEST_TXT + "\n" + "translated: " +
@@ -137,22 +155,7 @@ public class MorseFragment extends CommonFrag {
                     public void onClick(View v) {
                         if (Const.DEBUG) Log.v(TAG, "In onClick()");
 
-                        // If we are transmitting, then cease doing so.
-                        if (mTransThread != null) {
-                            mTransThread.interrupt();
-                            mTransThread = null;
-                        }
-
-                        // Get the text from the user.
-                        String txt = mUserText.getText().toString();
-                        if (Const.DEBUG) Log.v(TAG, "txt to be translated: " + txt);
-
-                        // Translate the text to Morse code.
-                        List<MoLetter> txtInMorse = MoTranslator.translateToMorse(txt);
-
-                        // Background thread executing the transmission.
-                        mTransThread = new TransmissionThread(getActivity(), mCam, txtInMorse);
-                        mTransThread.start();
+                        startTransmission(0);
                     }
                 });
 
@@ -169,10 +172,12 @@ public class MorseFragment extends CommonFrag {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {} // Not used
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            } // Not used
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}  // Not used
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }  // Not used
         });
 
         return mRoot;
@@ -182,20 +187,55 @@ public class MorseFragment extends CommonFrag {
     public void onStart() {
         super.onStart();
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
+    }
 
-        // Attach to the camera in advance.
-        if (this.mCam == null)
-            this.mCam = mListener.getDeviceCamera();
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (Const.DEBUG) Log.v(TAG, "In onResume() mIsTransmitting = " + mIsTransmitting +
+                ", mCurrenIndex = " + mCurrenIndex);
 
+        if (mCam == null) mCam = mListener.getDeviceCamera();
+
+        // If transmission was interrupted, continue where we left off.
+        if (mIsTransmitting){
+            startTransmission(mCurrenIndex);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState(), mIsTransmitting = " +
+                mIsTransmitting);
+
+        // Save  readings if transmission if hapenning.
+        if (mIsTransmitting){
+            outState.putBoolean(IS_TRANSMITTING, mTransThread.isTransmitting());
+            outState.putInt(CURRENT_INDEX, mTransThread.getCurrentIndex());
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (Const.DEBUG) Log.v(TAG, "In onPause()");
+
+        mCam = null;
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (Const.DEBUG) Log.v(TAG, "In onAttach()");
+        if (Const.DEBUG) Log.v(TAG, "In onStop()");
 
-        // Stop the transmitting background thread if such exists.
-        if (mTransThread != null) mTransThread.interrupt();
+        // Stop the transmitting background thread if such exists and save stuff for later.
+        if (mTransThread != null) {
+            mIsTransmitting = mTransThread.isTransmitting();
+            mCurrenIndex = mTransThread.getCurrentIndex();
+            mTransThread.interrupt();
+        }
+
     }
 
     @Override
@@ -205,11 +245,52 @@ public class MorseFragment extends CommonFrag {
         mListener = null;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (Const.DEBUG) Log.v(TAG, "In onDestroy()");
+    }
+
     /***********************************************************************************************
      *                            Only Android live cycle methods above this point!
      **********************************************************************************************/
 
     public String getTAG() { return TAG; }
+
+    /**
+     * Method to setup the transmission thread and initiate the transmission of the text.
+     *
+     * @param offset - Position index in the text indicating starting position.
+     */
+    private void startTransmission(int offset) {
+
+        // If we are transmitting, then cease doing so.
+        if (mTransThread != null) {
+            mTransThread.interrupt();
+            mTransThread = null;
+        }
+
+        // Get the text from the user.
+        String txt = mUserText.getText().toString();
+        if (Const.DEBUG) Log.v(TAG, "txt to be translated: " + txt);
+
+        // Translate the text to Morse code.
+        List<MoLetter> txtInMorse = MoTranslator.translateToMorse(txt);
+
+        // Display text to be transmitted in the status view.
+        mTextTransmitting.setText(txt);
+
+        // Background thread executing the transmission.
+        mTransThread = new TransmissionThread(getActivity(), mCam, txtInMorse, mTextTransmitting);
+
+        if (offset != 0) {
+            mTransThread.setCurrentIndex(offset);
+        }
+
+        mTransThread.updateSignalUnit(mSeekBar.getProgress());
+        mTransThread.start();
+        mIsTransmitting = true;
+    }
 
     /***********************************************************************************************
      *                                  INTERFACES

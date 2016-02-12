@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Torch</string>
+    <string name="app_name">Torch Tools</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -11,15 +11,15 @@
     <string name="pref_auto_on_summ">On App Launch Turn The Flash On</string>
     <string name="app_name_settings">Torch Settings</string>
     <string name="action_about">About</string>
-    <string name="about_dialog_message">This app has been coded for you by <b>A.T.</b> Charge, ad or
+    <string name="about_dialog_message">This app has been coded for you by <b>A.T.</b>, charge, ad or
         in-app-purchase free.</string>
 
     <string name="about_dialog_support">
         We would be grateful if you could take a minute of your time to rate the app on the
         PlayStore.
-        However, if you wish to support us with a cup of coffee, then you are more than welcome to
+        If you wish to support us with a cup of coffee, however, then you are more than welcome to
         do so by PayPal: Aidanas@inbox.com, thank you.</string>
-    <string name="about_dialog_title">Torch v2.0</string>
+    <string name="about_dialog_title">Torch Tools v2.2</string>
     <string name="OK">OK</string>
     <string name="Cancel">Cancel</string>
     <string name="no_flash_found">No Camera Flash Found!</string>
@@ -37,11 +37,9 @@
         <item>Morse</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="transmit">Transmit</string>
-    <string name="enter_text_to_transmit">Enter text to transmit...</string>
+    <string name="enter_text_to_transmit">Enter text to transmit&#8230;</string>
     <string name="speed">Transmission speed:</string>
-    <string name="transmitted_txt">Transmitting text</string>
-    <string name="enter_txt_here">Enter text here...</string>
+    <string name="transmitted_txt">Text transmitted&#8230;</string>
+    <string name="enter_txt_here">Enter text here&#8230;</string>
 </resources>
