@@ -17,4 +17,4 @@
 *.zip
 
 # External image resources. Kept on Gdrive, no need to check in to Git.
-/img
+/img/*
