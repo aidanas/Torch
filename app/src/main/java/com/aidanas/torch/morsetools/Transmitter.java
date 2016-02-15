@@ -81,7 +81,7 @@ public class Transmitter {
         boolean[] mLtr;
 
         // Initialise loop counter outside the loop as it must be reset after each full loop.
-        int i = mOffset;
+        int i = (mOffset == SignalReceiver.CLEAR_INDEX) ? 0 : mOffset ;
 
         // Loop indefinitely.
         while (true) {

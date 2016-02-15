@@ -1,22 +1,20 @@
 package com.aidanas.torch.fragments;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 
-import com.aidanas.torch.interfaces.CameraProvider;
 import com.aidanas.torch.Const;
 import com.aidanas.torch.R;
+import com.aidanas.torch.interfaces.CameraProvider;
 import com.aidanas.torch.interfaces.CommonFrag;
 
 /**
@@ -95,9 +93,8 @@ public class StrobeFragment extends CommonFrag {
     }
 
     @Override
-    public void onAttach(Activity context) {
+    public void onAttach(Context context) {
         super.onAttach(context);
-
         if (Const.DEBUG) Log.v(TAG, "In onAttach()");
 
         try {
@@ -147,9 +144,11 @@ public class StrobeFragment extends CommonFrag {
                         ", progress = " + progress);
 
                 if (seekBar == strobeSb) {
-                    strobeRate = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER + STROBE_RATE_VAL_OFFSET;
+                    strobeRate = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER +
+                            STROBE_RATE_VAL_OFFSET;
                 } else if (seekBar == flashSb) {
-                    flashLegth = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER + FLASH_LENGTH_VAL_OFFSET;
+                    flashLegth = (SEEKBAR_MAX_VALUE - progress) * SEEKBAR_VAL_MULTIPLIER +
+                            FLASH_LENGTH_VAL_OFFSET;
                 }
 
                 if (Const.DEBUG) Log.v(TAG, "In onProgressChanged(), Thread = " +
@@ -181,13 +180,15 @@ public class StrobeFragment extends CommonFrag {
 
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
-        // Attach to the camera in advance.
-        if (mCam == null) mCam = mListener.getDeviceCamera();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        // Attach to the camera in advance.
+        if (mCam == null) mCam = mListener.getDeviceCamera();
 
         if (Const.DEBUG) Log.v(TAG, "In onResume(), Thread = " + Thread.currentThread().getName());
 
@@ -210,7 +211,7 @@ public class StrobeFragment extends CommonFrag {
                         Thread.sleep(strobeRate);
 
                     }
-                } catch (InterruptedException e) {
+                } catch (InterruptedException e) { // Kill it.
                     // Tsss.. its all going to be over soon.
                 }
             }
@@ -223,8 +224,10 @@ public class StrobeFragment extends CommonFrag {
     @Override
     public void onPause() {
         super.onPause();
-
         if (Const.DEBUG) Log.v(TAG, "In onPause()");
+
+        lightOn(false);
+        mCam = null;
 
         // Kill the strobes thread.
         if (strobeThread != null) strobeThread.interrupt();
@@ -244,10 +247,8 @@ public class StrobeFragment extends CommonFrag {
     @Override
     public void onStop() {
         super.onStop();
-
         if (Const.DEBUG) Log.v(TAG, "In onStop()");
-        lightOn(false);
-        mCam = null;
+
     }
 
     @Override
