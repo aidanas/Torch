@@ -23,7 +23,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="120dp"
-            android:src="@drawable/featuregraphicsv2"
+            android:src="@drawable/featuregraphicsv2_2"
             android:layout_marginTop="5dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"

@@ -15,3 +15,11 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Since it is an open source project this is not needed. Human readable stack traces are handy.
+#-dontobfuscate # TODO: This causes buid error, why?
+
+# Remove all calls debug log calls.
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+}

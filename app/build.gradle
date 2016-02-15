@@ -9,8 +9,8 @@ android {
         applicationId "com.aidanas.torch"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 7
-        versionName "2.2"
+        versionCode 8
+        versionName "2.3"
     }
     buildTypes {
         release {
