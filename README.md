@@ -1,8 +1,8 @@
-# Torch
+# Torch, Strobe and Morse
 
-## Toggle camera flash on/off
+## Flashlight, adjustable strobe light and Morse code transmitter using camera flash LED. 
+
 When you absolutely positively just need to turn that camera flash on.
-
 
 Features:
 * Toggles the phone's camera flash on/off.
