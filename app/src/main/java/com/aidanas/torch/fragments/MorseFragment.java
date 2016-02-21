@@ -164,7 +164,8 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
                         if (Const.DEBUG) Log.v(TAG, "In onClick()");
 
                         // Make sure users input is valid.
-                        if (mUserText.getText().toString().matches(MoTranslator.VALID_REGEX)) {
+                        if (mUserText.getText().toString().toUpperCase()
+                                .matches(MoTranslator.VALID_REGEX)) {
                             startTransmission(0);
                         } else {
                             Toast.makeText(MorseFragment.this.getActivity(), "Invalid Text!",
@@ -285,7 +286,7 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
         }
 
         // Get the text from the user.
-        String txt = mUserText.getText().toString();
+        String txt = mUserText.getText().toString().toUpperCase();
         if (Const.DEBUG) Log.v(TAG, "txt to be translated: " + txt);
 
         // Translate the text to Morse code.
