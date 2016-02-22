@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -63,6 +64,7 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
     private EditText mUserText;
     private TextView mTextTransmitting;
     private SeekBar mSeekBar;
+    private Button mTransmitBtn;
 
     // Thread which will do the signaling.
     private TransmissionThread mTransThread;
@@ -152,26 +154,37 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
         mRoot = inflater.inflate(R.layout.fragment_morse, container, false);
         mSeekBar = (SeekBar) mRoot.findViewById(R.id.morse_frag_transmitsion_rate_sb);
         mUserText = (EditText) mRoot.findViewById(R.id.morse_frag_txt_to_transmit_tw);
+        mTransmitBtn =  (Button) mRoot.findViewById(R.id.morse_frag_transmit_btn);
         mTextTransmitting = (TextView) mRoot.findViewById(R.id.morse_frag_transmitting_tw);
+
+        if (mIsTransmitting) mTransmitBtn.setText(R.string.STOP);
 
         /*
          * Button click listener will initiate the transmission.
          */
-        mRoot.findViewById(R.id.morse_frag_transmit_btn)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Const.DEBUG) Log.v(TAG, "In onClick()");
+        mTransmitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Const.DEBUG) Log.v(TAG, "In onClick()");
 
-                        // Make sure users input is valid.
-                        if (mUserText.getText().toString().matches(MoTranslator.VALID_REGEX)) {
-                            startTransmission(0);
-                        } else {
-                            Toast.makeText(MorseFragment.this.getActivity(), "Invalid Text!",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                /*
+                 * If currently transmitting then stop. Otherwise validate input and start
+                 * transmission.
+                 */
+                if (mIsTransmitting && mTransThread != null) {
+                    stopTransmission();
+                    mTransmitBtn.setText(R.string.transmit);
+                    mIsTransmitting = false;
+                    // Is the input text valid?
+                } else if (mUserText.getText().toString().matches(MoTranslator.VALID_REGEX)) {
+                    startTransmission(0);
+                    mTransmitBtn.setText(R.string.STOP);
+                } else {
+                    Toast.makeText(MorseFragment.this.getActivity(), "Invalid Text!",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         /*
          * Setup the listener for transmission rate seek bar.
@@ -223,7 +236,7 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
         if (Const.DEBUG) Log.v(TAG, "In onSaveInstanceState(), mIsTransmitting = " +
                 mIsTransmitting);
 
-        // Save  readings if transmission if hapenning.
+        // Save  readings if transmission if happening.
         if (mIsTransmitting){
             outState.putBoolean(IS_TRANSMITTING, mTransThread.isTransmitting());
             outState.putInt(CURRENT_INDEX, mTransThread.getCurrentIndex());
@@ -278,11 +291,7 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
      */
     private void startTransmission(int offset) {
 
-        // If we are transmitting, then cease doing so.
-        if (mTransThread != null) {
-            mTransThread.interrupt();
-            mTransThread = null;
-        }
+        stopTransmission();
 
         // Get the text from the user.
         String txt = mUserText.getText().toString();
@@ -305,6 +314,20 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
         mTransThread.updateSignalUnit(mSeekBar.getProgress());
         mTransThread.start();
         mIsTransmitting = true;
+    }
+
+    /**
+     * Method to terminate current transmission.
+     */
+    private void stopTransmission() {
+        // If we are transmitting, then cease doing so.
+        if (mTransThread != null) {
+            mTransThread.interrupt();
+            mTransThread = null;
+        }
+
+        // Delete the currently transmitting text.
+        mTextTransmitting.setText("");
     }
 
     /***********************************************************************************************

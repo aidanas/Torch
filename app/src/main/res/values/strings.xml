@@ -37,9 +37,10 @@
         <item>Morse</item>
     </string-array>
 
-    <string name="transmit">Transmit</string>
+    <string name="transmit">TRANSMIT</string>
     <string name="enter_text_to_transmit">Enter text to transmit&#8230;</string>
     <string name="speed">Transmission speed:</string>
     <string name="transmitted_txt">Text transmitted&#8230;</string>
     <string name="enter_txt_here">Enter text here&#8230;</string>
+    <string name="STOP">STOP</string>
 </resources>
