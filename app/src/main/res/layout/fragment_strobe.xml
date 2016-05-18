@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colour_sch1_colour5"
+    android:background="@color/colour_purple_colour5"
     tools:context=".MainActivity">
 
     <LinearLayout

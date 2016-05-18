@@ -2,7 +2,6 @@ package com.aidanas.torch.fragments;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -294,7 +293,7 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
         stopTransmission();
 
         // Get the text from the user.
-        String txt = mUserText.getText().toString();
+        String txt = mUserText.getText().toString().toUpperCase();
         if (Const.DEBUG) Log.v(TAG, "txt to be translated: " + txt);
 
         // Translate the text to Morse code.
@@ -351,9 +350,9 @@ public class MorseFragment extends CommonFrag implements CurrentIndexReceiver {
 
             // ...and the colour.
             ss.setSpan(new ForegroundColorSpan(getActivity().getResources()
-                    .getColor(R.color.colour_sch1_colour1)), index, index + 1, 0);
+                    .getColor(R.color.colour_purple_colour1)), index, index + 1, 0);
             ss.setSpan(new BackgroundColorSpan(getActivity().getResources()
-                    .getColor(R.color.colour_sch1_colour4)), index, index + 1, 0);
+                    .getColor(R.color.colour_purple_colour4)), index, index + 1, 0);
             mTextTransmitting.setText(ss);
         }
     }

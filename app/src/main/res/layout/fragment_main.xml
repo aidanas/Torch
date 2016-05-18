@@ -4,7 +4,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:background="@color/colour_sch1_colour5" tools:context=".MainActivity">
+    android:background="@color/colour_purple_colour5" tools:context=".MainActivity">
 
     <Button
         android:id="@+id/ma_btn"
@@ -12,6 +12,6 @@
         android:layout_height="fill_parent"
         android:text="@string/ma_btn_txt_lights_up"
         android:textSize="20sp"
-        android:background="@color/colour_sch1_colour4"/>
+        android:background="@color/colour_purple_colour4"/>
 
 </RelativeLayout>

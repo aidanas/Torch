@@ -43,4 +43,9 @@
     <string name="transmitted_txt">Text transmitted&#8230;</string>
     <string name="enter_txt_here">Enter text here&#8230;</string>
     <string name="STOP">STOP</string>
+
+    <!-- Camera unavailable dialog string -->
+    <string name="exit_dlg_title">Camera Unavailable!</string>
+    <string name="ok">Exit</string>
+    <string name="exit_dlg_message">Some other activity may be currently using the camera.</string>
 </resources>
