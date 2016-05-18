@@ -21,7 +21,7 @@ public class MoTranslator {
     public static final String TAG = MoLetter.class.getSimpleName();
 
     // Regex of acceptable patterns. A string must match fully if to be successfully translated.
-    public static final String VALID_REGEX = "^[A-Z0-9\\s]+$";
+    public static final String VALID_REGEX = "^[A-Za-z0-9\\s]+$";
 
     private static boolean[][] moLettersArr = {
             {false, true},                  // A

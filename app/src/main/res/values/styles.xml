@@ -1,11 +1,22 @@
 <resources>
 
     <!-- THEME. A set of styles for the app defined here -->
-    <style name="AppTheme" parent="Theme.AppCompat">
-        <item name="android:actionBarStyle">@style/ActionBar</item>
-        <item name="actionBarStyle">@style/ActionBar</item>
+    <style name="AppThemePurple" parent="Theme.AppCompat">
+        <item name="android:actionBarStyle">@style/ActionBarPurple</item>
+        <item name="actionBarStyle">@style/ActionBarPurple</item>
+        <item name="android:windowBackground">@color/colour_purple_colour5</item>
+        <item name="android:colorPrimary">#00FF00</item>
+
         <!-- Set of application wide styles go here.-->
     </style>
+
+    <style name="AppThemeBlue" parent="Theme.AppCompat">
+        <item name="android:actionBarStyle">@style/ActionBarBlue</item>
+        <item name="actionBarStyle">@style/ActionBarBlue</item>
+        <item name="android:buttonStyle">@style/RedBG</item>
+        <!-- Set of application wide styles go here.-->
+    </style>
+
 
     <!-- Separate styles defined here -->
     <!--Navigation drawer menu items-->
@@ -13,9 +24,20 @@
        <item name="android:background">@drawable/ls_selector</item>
     </style>
 
-    <style name="ActionBar" >
-        <item name="android:background">@color/colour_sch1_colour3</item>
-        <item name="background">@color/colour_sch1_colour3</item>
+    <style name="ActionBarPurple" >
+        <item name="android:background">@color/colour_purple_colour3</item>
+        <item name="background">@color/colour_purple_colour3</item>
     </style>
 
+
+    <style name="ActionBarBlue">
+        <item name="android:background">@color/colour_blue_colour3</item>
+        <item name="background">@color/colour_blue_colour3</item>
+    </style>
+
+
+    <!--Testing-->
+    <style name="RedBG" parent="@android:style/Widget.Button">
+        <item name="android:background">@android:color/holo_red_dark</item>
+    </style>
 </resources>

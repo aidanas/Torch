@@ -1,16 +1,16 @@
 package com.aidanas.torch;
 
-import android.content.Intent;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -109,7 +109,12 @@ public class MainActivity extends AppCompatActivity implements
         super.onStart();
         if (Const.DEBUG) Log.v(TAG, "In onStart()");
 
-        this.mCam = getCamera();
+        mCam = getCamera();
+
+        // No point to continue if camera unavailable.
+        if (mCam == null) {
+            noCameraExitWithDialog();
+        }
     }
 
     @Override
@@ -291,6 +296,27 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    /**
+     * Method informs the user that camera could not be opened and exits.
+     */
+    private void noCameraExitWithDialog() {
+        if (Const.DEBUG) Log.v(TAG, "In noCameraExitWithDialog");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.exit_dlg_title);
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+
+        builder.setMessage("Activity could not obtain access to the camera. Some other activity " +
+                getString(R.string.exit_dlg_message));
+        builder.setCancelable(false);
+        builder.show();
+    }
+
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
 
@@ -355,7 +381,11 @@ public class MainActivity extends AppCompatActivity implements
 
         // Open, start and return a camera object.
         Camera cam = Camera.open();
-        cam.startPreview();
+
+        if (cam != null){
+            cam.startPreview();
+        }
+
         return cam;
     }
 

@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ls_bg_normal_grad_st">@color/colour_sch1_colour3</color>
-    <color name="ls_bg_normal_grad_end">@color/colour_sch1_colour4</color>
-    <color name="ls_bg_pressed_grad_st">@color/colour_sch1_colour1</color>
-    <color name="ls_bg_pressed_grad_end">@color/colour_sch1_colour2</color>
+    <color name="ls_bg_normal_grad_st">@color/colour_purple_colour3</color>
+    <color name="ls_bg_normal_grad_end">@color/colour_purple_colour4</color>
+    <color name="ls_bg_pressed_grad_st">@color/colour_purple_colour1</color>
+    <color name="ls_bg_pressed_grad_end">@color/colour_purple_colour2</color>
     <color name="ls_bg">#88000000</color>
     <color name="ls_divider">#00000000</color>
 
 
     <!-- 5 colours generated form colour generator. Should be applied throughout the app. -->
-    <color name="colour_sch1_colour1">#eaeaea</color>
-    <color name="colour_sch1_colour2">#89315a</color>
-    <color name="colour_sch1_colour3">#4a1942</color>
-    <color name="colour_sch1_colour4">#2e1c2b</color>
-    <color name="colour_sch1_colour5">#050404</color>
+    <color name="colour_purple_colour1">#eaeaea</color>
+    <color name="colour_purple_colour2">#89315a</color>
+    <color name="colour_purple_colour3">#4a1942</color>
+    <color name="colour_purple_colour4">#2e1c2b</color>
+    <color name="colour_purple_colour5">#050404</color>
+
+
+    <color name="colour_blue_colour1">#ffffff</color>
+    <color name="colour_blue_colour2">#bfc0bb</color>
+    <color name="colour_blue_colour3">#5877d4</color>
+    <color name="colour_blue_colour4">#2951cd</color>
+    <color name="colour_blue_colour5">#0f111e</color>
 </resources>
