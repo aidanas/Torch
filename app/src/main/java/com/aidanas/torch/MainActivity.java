@@ -271,7 +271,9 @@ public class MainActivity extends AppCompatActivity implements
     private void showAboutDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.about_dialog_title);
+
+        // Set title to default prefix string + app version.
+        builder.setTitle(getString(R.string.about_dialog_title) + BuildConfig.VERSION_NAME);
 
         // Rate this App button, opens Playstore to rate this app.
         builder.setPositiveButton(R.string.rate_app, new DialogInterface.OnClickListener() {
@@ -317,7 +319,9 @@ public class MainActivity extends AppCompatActivity implements
         builder.show();
     }
 
-    /** Swaps fragments in the main content view */
+    /**
+     * Swaps fragments in the main content view
+     */
     private void selectItem(int position) {
 
         if (Const.DEBUG) Log.v(TAG, "In selectItem, position = " + position);
@@ -379,8 +383,16 @@ public class MainActivity extends AppCompatActivity implements
     private Camera getCamera(){
         if (Const.DEBUG) Log.v(TAG, "In getCamera()");
 
-        // Open, start and return a camera object.
-        Camera cam = Camera.open();
+        /*
+         * Open, start and return a camera object. Throws runtime exception if the camera is
+         * currently used by other applications. If such is the case then display dialog and exit.
+         */
+        Camera cam = null;
+        try {
+            cam = Camera.open();
+        } catch ( RuntimeException re) {
+            noCameraExitWithDialog();
+        }
 
         if (cam != null){
             cam.startPreview();
@@ -401,6 +413,7 @@ public class MainActivity extends AppCompatActivity implements
             this.mCam = null;
         }
     }
+
 
     /***********************************************************************************************
      *                                  INTERFACE IMPLEMENTATIONS
